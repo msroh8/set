@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دورة احتراف الـ Maps في C++ | المدرب محمد مجممي</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Tajawal for Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for C++ Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#8b5cf6', // Violet 500 (ميزنا دورة Map بلون مختلف)
+                        secondary: '#1e293b', // Slate 800
+                        accent: '#f59e0b', // Amber 500
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        .lesson-content { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .lesson-content.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item { transition: all 0.2s ease; border-right: 4px solid transparent; }
+        .nav-item.active { 
+            background-color: #f5f3ff; 
+            border-right: 4px solid #8b5cf6; 
+            color: #5b21b6; 
+            font-weight: bold;
+        }
+        .nav-item:hover:not(.active) { background-color: #f8fafc; }
+        
+        /* Custom scrollbar for main content */
+        main::-webkit-scrollbar { width: 8px; }
+        main::-webkit-scrollbar-track { background: #f1f1f1; }
+        main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        main::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Prism overrides */
+        pre[class*="language-"] { border-radius: 0.75rem; margin-top: 0; margin-bottom: 0; padding-top: 2.5rem !important; }
+        .pro-tip { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-right: 4px solid #f59e0b; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen bg-slate-50 text-slate-800 overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-80 bg-white shadow-xl z-20 flex flex-col flex-shrink-0 md:h-screen">
+        <div class="p-6 bg-secondary text-white">
+            <h1 class="text-2xl font-black mb-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-violet-400 to-fuchsia-400">
+                أبطال البرمجة (C++)
+            </h1>
+            <p class="text-slate-300 text-sm">أسرار الخرائط (Maps) للمسابقات</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="showLesson(1)" id="nav-1" class="nav-item active w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>1. خزانة الملفات الذكية</span>
+                <span class="text-xs bg-violet-100 text-violet-600 px-2 py-1 rounded-full">مقدمة</span>
+            </button>
+            <button onclick="showLesson(2)" id="nav-2" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>2. بناء وتجهيز الخريطة</span>
+            </button>
+            <button onclick="showLesson(3)" id="nav-3" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>3. الفخ الخطير (إضافة وبحث)</span>
+                <span class="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">هام</span>
+            </button>
+            <button onclick="showLesson(4)" id="nav-4" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>4. لوحة التحكم (العمليات)</span>
+            </button>
+            <button onclick="showLesson(5)" id="nav-5" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>5. استخراج البيانات (Iteration)</span>
+            </button>
+            <button onclick="showLesson(6)" id="nav-6" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>6. تحدي عداد الكلمات</span>
+                <span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full">تطبيق</span>
+            </button>
+            <button onclick="showLesson(7)" id="nav-7" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>7. عائلة الـ Maps (الأنواع)</span>
+                <span class="text-xs bg-accent text-white px-2 py-1 rounded-full shadow-sm">السر</span>
+            </button>
+        </nav>
+        
+        <!-- Footer / Signature -->
+        <div class="p-4 bg-slate-100 text-center border-t border-slate-200 mt-auto">
+            <p class="text-sm font-bold text-slate-600">إعداد وتصميم</p>
+            <p class="text-lg font-black text-primary mt-1">المدرب / محمد مجممي</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto scroll-smooth relative" id="main-content">
+        
+        <div class="max-w-4xl mx-auto p-6 md:p-10 pb-32">
+            
+            <!-- Lesson 1 -->
+            <section id="lesson-1" class="lesson-content active">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الأول: خزانة الملفات الذكية (Map)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">فهم كيفية ربط البيانات ببعضها في لغة C++.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                            <span>🗄️</span> التمهيد الجاذب (دفتر العناوين)
+                        </h3>
+                        <p class="mb-4 leading-relaxed">
+                            "تخيلوا أننا نريد تصميم برنامج يسجل أعمار الطلاب في المدرسة. إذا سألت الكمبيوتر: 'كم عمر الطالب أحمد؟'، أريده أن يجيبني فوراً '14 سنة'. 
+                            في المصفوفات العادية، لا يمكننا استخدام أسماء الأشخاص للبحث، بل نستخدم أرقاماً (مثل 0, 1, 2). هنا يتدخل بطلنا الجديد: <strong class="text-primary">الـ Map (الخريطة)</strong>."
+                        </p>
+                        <p class="leading-relaxed">الـ Map هو عبارة عن <strong>"خزانة ذكية"</strong> تقوم بتخزين البيانات على شكل أزواج مترابطة:</p>
+                        <ul class="list-disc list-inside mt-2 space-y-2 text-slate-700">
+                            <li><strong class="text-blue-600">المفتاح (Key):</strong> مثل الملصق الموجود على الدرج (مثال: اسم الطالب). يجب أن يكون فريداً ولا يتكرر.</li>
+                            <li><strong class="text-emerald-600">القيمة (Value):</strong> هي المعلومة الموجودة داخل الدرج (مثال: عمر الطالب). يمكن أن تتكرر.</li>
+                            <li><strong>الترتيب التلقائي:</strong> الخزانة تقوم بترتيب الأدراج أبجدياً (أو تصاعدياً) حسب "المفتاح" بشكل تلقائي!</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">نظرة سريعة على الكود</h3>
+                        
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">#include &lt;map&gt;</code>: أمر استدعاء مكتبة الخرائط لتفعيل هذه الأداة.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">map&lt;string, int&gt; ages;</code>: إنشاء خزانة اسمها ages. المفتاح فيها نص (string)، والقيمة رقم (int).</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">ages["Alice"] = 25;</code>: افتح الدرج المكتوب عليه Alice وضع بداخله الرقم 25.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">for (auto p : ages)</code>: حلقة تكرارية للمرور على جميع الأدراج وطباعة المفتاح والقيمة.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt; // أمر استدعاء المكتبة
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; ages; // المفتاح نص، والقيمة رقم
+
+    ages["Alice"] = 25;
+    ages["Bob"] = 30;
+    ages["Charlie"] = 22;
+
+    for (auto p : ages)
+        cout &lt;&lt; p.first &lt;&lt; ": " &lt;&lt; p.second &lt;&lt; endl;
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-bold text-emerald-400 mb-2">شاشة المخرجات (Output):</h3>
+                        <pre dir="ltr" class="text-left text-lg font-mono text-white bg-transparent p-0 m-0 border-0 leading-loose">Alice: 25
+Bob: 30
+Charlie: 22</pre>
+                        <p class="mt-4 text-slate-300 text-sm border-t border-slate-600 pt-4">
+                            <strong>ملاحظة هامة:</strong> الأسماء طُبعت بالترتيب الأبجدي A ثم B ثم C، لأن الـ <code>map</code> يرتب المفاتيح تلقائياً.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 2 -->
+            <section id="lesson-2" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثاني: بناء وتجهيز الخريطة</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">كيف نحدد أنواع البيانات للمفتاح والقيمة.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">مصنع الخزائن 🛠️</h3>
+                        <p class="leading-relaxed mb-4">
+                            قبل استخدام الخريطة، يجب أن نخبر الكمبيوتر بوضوح: <strong>"ما هو نوع الملصق (المفتاح)؟ وما هو نوع المعلومة (القيمة)؟"</strong>. 
+                            الميزة الرائعة أننا أحرار في دمج أي نوعين من البيانات!
+                        </p>
+                        
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">map&lt;int, string&gt;</code>: تصلح لقاعدة بيانات الطلاب، حيث المفتاح هو "رقم الجلوس" (int) والقيمة هي "اسم الطالب" (string).</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">map&lt;string, double&gt;</code>: تصلح لمتجر، حيث المفتاح "اسم المنتج" (string) والقيمة "السعر" (double - رقم عشري).</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">map&lt;char, int&gt;</code>: تصلح لعد الحروف، حيث المفتاح "الحرف" (char) والقيمة "عدد مرات ظهوره" (int).</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">#include &lt;map&gt; // خطوة أساسية
+
+// أمثلة على تشكيلات مختلفة:
+map&lt;int, string&gt; students;     // المفتاح: رقم صحيح ، القيمة: نص
+map&lt;string, double&gt; prices;    // المفتاح: نص ، القيمة: رقم عشري
+map&lt;char, int&gt; frequency;      // المفتاح: حرف واحد ، القيمة: رقم صحيح</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="pro-tip p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-accent mb-2 text-lg flex items-center gap-2">
+                            <span>💡</span> نصيحة مسابقات (Pro Tip)
+                        </h3>
+                        <p class="text-slate-700 leading-relaxed">
+                            في المسابقات، تذكر دائماً أن الترتيب يتم <strong>بناءً على المفتاح (النوع الأول) فقط</strong>، وليس بناءً على القيمة. إذا أردت ترتيب العناصر أبجدياً اجعل النص هو المفتاح، وإذا أردتها تصاعدياً بالرقم اجعل الرقم هو المفتاح.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 3 -->
+            <section id="lesson-3" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثالث: الفخ الخطير! (إضافة وبحث)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">طريقة الوصول للبيانات، وكيف تتجنب الأخطاء الشائعة.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">الوصول السهل باستخدام <code>[]</code></h3>
+                        <p class="leading-relaxed mb-4">
+                            لإضافة عنصر أو قراءته، نستخدم الأقواس المربعة ونضع داخلها "المفتاح".
+                        </p>
+
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">scores["Mark"] = 90;</code>: هذه تعليمة إضافة وتعديل في نفس الوقت. إذا كان Mark غير موجود سيتم إضافته، وإذا كان موجوداً سيتغير رقمه إلى 90.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">cout &lt;&lt; scores["Mark"];</code>: لطباعة القيمة المرتبطة بـ Mark.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">map&lt;string, int&gt; scores;
+
+scores["Mark"] = 90;          // الإضافة باستخدام الأقواس []
+cout &lt;&lt; scores["Mark"];       // يطبع 90</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 p-6 rounded-xl shadow-sm border border-red-200">
+                        <h3 class="text-xl font-bold text-red-600 mb-3">⚠️ الفخ: ماذا لو بحثنا عن مفتاح غير موجود؟</h3>
+                        <p class="leading-relaxed mb-4 text-slate-700">
+                            تخيل أنك تبحث عن نتيجة طالب اسمه "Unknown" وهو غير مسجل في النظام. في لغات برمجة أخرى سيحدث خطأ (Error)، لكن لغة C++ تتصرف بشكل غريب جداً!
+                        </p>
+
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li>عندما نستخدم الأقواس المربعة للبحث عن مفتاح غير موجود، فإن البرنامج <strong>يُنشئ هذا المفتاح فوراً</strong> ويعطيه قيمة صفرية (0). هذا قد يخرب بياناتنا في المسابقات!</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">cout &lt;&lt; scores["Unknown"];  // المفاجأة: لن يحدث خطأ، بل سيطبع 0 وينشئ درجاً جديداً له!</code></pre>
+                        </div>
+                        
+                        <p class="mt-4 font-bold text-slate-800">الحل الآمن: استخدام الرادار <code>count()</code></p>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li>دالة <code class="bg-slate-100 px-1 rounded text-primary">count("Tom")</code> تتحقق بهدوء: هل Tom موجود؟ (تعيد 1 إذا وجدته، و 0 إذا لم تجده) دون أن تنشئ درجاً جديداً له.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">// قبل الطباعة، تأكد من وجوده باستخدام الرادار
+if (scores.count("Tom")) {
+    cout &lt;&lt; "Tom found: " &lt;&lt; scores["Tom"];
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 4 -->
+            <section id="lesson-4" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الرابع: لوحة التحكم (العمليات الشائعة)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">الأدوات الأساسية لإدارة محتويات الخريطة.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
+                        <table class="w-full text-right border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700">
+                                    <th class="p-4 border-b border-slate-200">العملية (الوظيفة)</th>
+                                    <th class="p-4 border-b border-slate-200" dir="ltr">المثال بالكود</th>
+                                    <th class="p-4 border-b border-slate-200">الشرح المبسط</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-slate-600">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-4 border-b border-slate-100 font-bold text-primary">الإضافة والوصول <code>[]</code></td>
+                                    <td class="p-4 border-b border-slate-100 font-mono text-sm" dir="ltr">m["Bob"] = 10;</td>
+                                    <td class="p-4 border-b border-slate-100">لإضافة عنصر جديد أو قراءة وتعديل قيمة موجودة.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-4 border-b border-slate-100 font-bold text-red-500">الحذف <code>erase()</code></td>
+                                    <td class="p-4 border-b border-slate-100 font-mono text-sm" dir="ltr">m.erase("Bob");</td>
+                                    <td class="p-4 border-b border-slate-100">يحذف "الدرج" كاملاً (المفتاح والقيمة معاً).</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-4 border-b border-slate-100 font-bold text-blue-500">التحقق <code>count()</code></td>
+                                    <td class="p-4 border-b border-slate-100 font-mono text-sm" dir="ltr">if (m.count("Bob"))</td>
+                                    <td class="p-4 border-b border-slate-100">يعيد 1 إذا كان المفتاح موجوداً، و 0 إذا لم يكن.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-4 border-b border-slate-100 font-bold text-emerald-500">العدد <code>size()</code></td>
+                                    <td class="p-4 border-b border-slate-100 font-mono text-sm" dir="ltr">m.size();</td>
+                                    <td class="p-4 border-b border-slate-100">يخبرنا بعدد الأزواج (العناصر) الموجودة حالياً.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-4 border-b border-slate-100 font-bold text-orange-500">التدمير <code>clear()</code></td>
+                                    <td class="p-4 border-b border-slate-100 font-mono text-sm" dir="ltr">m.clear();</td>
+                                    <td class="p-4 border-b border-slate-100">يفرغ الخزانة تماماً ويحذف جميع العناصر.</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-4 border-b border-slate-100 font-bold text-indigo-500">كاشف الفراغ <code>empty()</code></td>
+                                    <td class="p-4 border-b border-slate-100 font-mono text-sm" dir="ltr">if (m.empty())</td>
+                                    <td class="p-4 border-b border-slate-100">يعيد True إذا كانت الخريطة فارغة.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 5 -->
+            <section id="lesson-5" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الخامس: استخراج البيانات (Iteration)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">كيف نمر على كل محتويات الخريطة لطباعتها.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="text-slate-700 mb-4">
+                            عندما نستخدم حلقة التكرار للمرور على عناصر الـ Map، نحن لا نستخرج قيمة واحدة، بل نستخرج <strong>"زوجاً" (Pair)</strong> في كل خطوة (المفتاح والقيمة معاً).
+                        </p>
+                        
+                        <h3 class="text-xl font-bold text-primary mb-3">الطريقة الحديثة: القطار السريع 🚆</h3>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">auto p</code>: الزوج المستخرج الحالي.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">p.first</code>: الكلمة السرية لاستخراج "المفتاح" (الاسم).</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">p.second</code>: الكلمة السرية لاستخراج "القيمة" (العمر).</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">for (auto p : myMap) {
+    // p.first  يعني المفتاح
+    // p.second يعني القيمة
+    cout &lt;&lt; p.first &lt;&lt; " -&gt; " &lt;&lt; p.second &lt;&lt; endl;
+}</code></pre>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-purple-600 mt-8 mb-3">طريقة المحترفين: المفتش (Iterator) 🕵️</h3>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li>في طريقة المؤشر، نستخدم السهم <code class="bg-slate-100 px-1 rounded text-primary">-&gt;</code> بدلاً من النقطة للوصول إلى first و second.</li>
+                                    <li>هذه الطريقة تستخدم في المسابقات عند الحاجة للبحث عن نقطة معينة والبدء منها بدلاً من المرور على الخريطة كاملة.</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">for (auto it = myMap.begin(); it != myMap.end(); it++) {
+    // لاحظ استخدام علامة السهم
+    cout &lt;&lt; it-&gt;first &lt;&lt; ": " &lt;&lt; it-&gt;second &lt;&lt; endl;
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 6 -->
+            <section id="lesson-6" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس السادس: تحدي عداد الكلمات</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">تطبيق عملي: أشهر مسألة في البرمجة التنافسية باستخدام الخرائط.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="leading-relaxed mb-4">
+                            <strong>التحدي:</strong> إعطاؤك جملة طويلة، والمطلوب حساب كم مرة تكررت كل كلمة فيها! باستخدام الـ Map، يمكننا حل هذه المسألة الصعبة بأسطر قليلة وبطريقة عبقرية.
+                        </p>
+                        
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">map&lt;string, int&gt; freq;</code>: خريطة مفتاحها الكلمة، وقيمتها عدد مرات الظهور.</li>
+                                    <li>تقوم الحلقة بتجميع الحروف لتكوين الكلمة. عندما تجد مسافة، تعتبر الكلمة مكتملة.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">freq[word]++</code>: السطر السحري! يذهب لدرج الكلمة، وإذا لم تكن موجودة ينشئها بقيمة 0 ثم يضيف 1 فتصبح 1. وإذا ظهرت مجدداً يرفع العدد إلى 2... وهكذا.</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string text = "apple banana apple orange banana apple";
+    map&lt;string, int&gt; freq; // الخريطة السحرية
+
+    string word;
+    for (auto c : text) {
+        if (c == ' ') { // إذا وجدنا مسافة، انتهت الكلمة
+            if (!word.empty()) freq[word]++; // زد العداد بمقدار 1
+            word.clear(); // فرغ المتغير لنبدأ كلمة جديدة
+        } else {
+            word += c; // تجميع الحروف لتكوين كلمة
+        }
+    }
+    if (!word.empty()) freq[word]++; // لتسجيل آخر كلمة في الجملة
+
+    // طباعة التقرير النهائي
+    for (auto p : freq)
+        cout &lt;&lt; p.first &lt;&lt; ": " &lt;&lt; p.second &lt;&lt; endl;
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-6 rounded-xl shadow-md text-center">
+                        <h3 class="text-lg font-bold text-emerald-400 mb-2">المخرجات (ستظهر مرتبة أبجدياً!):</h3>
+                        <pre dir="ltr" class="text-center text-xl font-mono text-white bg-transparent p-0 border-0 leading-loose">apple: 3
+banana: 2
+orange: 1</pre>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 7 -->
+            <section id="lesson-7" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس السابع: عائلة الـ Maps (السلاح السري)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">الفرق بين الخريطة العادية والخريطة السريعة جداً.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Type 1 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500">
+                            <h3 class="text-xl font-bold text-blue-600 mb-2">الخريطة العادية <code>map</code></h3>
+                            <ul class="text-sm space-y-3 text-slate-700 mb-4">
+                                <li class="flex items-center gap-2">✅ <strong>مرتبة:</strong> ترتب المفاتيح دائماً.</li>
+                                <li class="flex items-center gap-2">❌ <strong>المكرر:</strong> لا تسمح بتكرار المفاتيح.</li>
+                                <li class="flex items-center gap-2">⏱️ <strong>السرعة:</strong> O(log n) (ممتازة).</li>
+                                <li class="text-xs text-slate-500 mt-2">طريقة العمل: شجرة متوازنة.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Type 2 -->
+                        <div class="bg-violet-50 p-6 rounded-xl shadow-sm border-t-4 border-violet-500">
+                            <h3 class="text-xl font-bold text-violet-700 mb-2">الخريطة الفوضوية <code>unordered_map</code></h3>
+                            <ul class="text-sm space-y-3 text-slate-800 mb-4">
+                                <li class="flex items-center gap-2">❌ <strong>مرتبة:</strong> عشوائية تماماً.</li>
+                                <li class="flex items-center gap-2">❌ <strong>المكرر:</strong> لا تسمح بتكرار المفاتيح.</li>
+                                <li class="flex items-center gap-2 text-emerald-600">🚀 <strong>السرعة:</strong> O(1) متوسطاً (خارقة!).</li>
+                                <li class="text-xs text-slate-500 mt-2">طريقة العمل: جداول التجزئة (Hashing).</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">مثال تطبيقي: الخريطة الخارقة</h3>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">#include &lt;unordered_map&gt;</code>: أمر استدعاء خاص بها.</li>
+                                    <li>نفس الأوامر السابقة تماماً، الفرق الوحيد أن هذه الخريطة لا تهتم بترتيب الأسماء، لكنها تعطيك النتيجة بسرعة الضوء لتنقذك في المسابقات!</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;unordered_map&gt; // أمر استدعاء مختلف
+using namespace std;
+
+int main() {
+    // تعريف الخريطة السريعة
+    unordered_map&lt;string, int&gt; age;
+
+    age["Bob"] = 30;
+    age["Alice"] = 25;
+    age["Tom"] = 28;
+
+    for (auto p : age)
+        cout &lt;&lt; p.first &lt;&lt; ": " &lt;&lt; p.second &lt;&lt; endl;
+}</code></pre>
+                        </div>
+                        <p class="text-sm text-slate-600 italic">الناتج سيكون عشوائياً (مثلاً قد يطبع Tom ثم Bob ثم Alice). استخدمها عندما يكون "الترتيب" غير مطلوب في السؤال، وتكون "السرعة القصوى" هي هدفك لتجنب (Time Limit).</p>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-200 p-6 rounded-xl shadow-sm text-center">
+                        <h3 class="text-2xl mb-2 font-black">🎉 أحسنت يا بطل! 🎉</h3>
+                        <p class="text-emerald-800 font-medium">
+                            لقد أضفت الآن سلاحاً جديداً وقوياً جداً (Maps) إلى ترسانتك البرمجية. أنت مستعد لحل أعقد المسائل في الأولمبياد المعلوماتي!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-12 pt-6 border-t border-slate-200">
+                <button id="prev-btn" onclick="navigate(-1)" class="px-6 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors hidden font-bold shadow-sm">
+                    &rarr; الدرس السابق
+                </button>
+                <div class="flex-1"></div> <!-- Spacer -->
+                <button id="next-btn" onclick="navigate(1)" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-violet-600 transition-colors font-bold shadow-md">
+                    الدرس التالي &larr;
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal for Code Explanation -->
+    <div id="codeModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-300" id="modalContentBlock">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <h3 class="text-xl font-bold text-primary flex items-center gap-2">
+                    <span class="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center font-black">!</span>
+                    شرح الكود البرمجي
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 text-3xl leading-none">&times;</button>
+            </div>
+            <!-- Modal Body Content -->
+            <div id="modalBody" class="mb-6 overflow-y-auto max-h-96 pr-2">
+                <!-- Dynamic Content Will Be Inserted Here -->
+            </div>
+            <button onclick="closeModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 rounded-lg transition-colors border border-slate-200">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript for Navigation and Modals -->
+    <script>
+        let currentLesson = 1;
+        const totalLessons = 7;
+
+        function showLesson(lessonNumber) {
+            // Hide all lessons
+            document.querySelectorAll('.lesson-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected lesson
+            document.getElementById(`lesson-${lessonNumber}`).classList.add('active');
+            
+            // Highlight selected nav item
+            document.getElementById(`nav-${lessonNumber}`).classList.add('active');
+            
+            currentLesson = lessonNumber;
+            updateButtons();
+            
+            // Scroll to top of main content
+            document.getElementById('main-content').scrollTop = 0;
+            
+            // Close sidebar on mobile after clicking
+            if (window.innerWidth < 768 && document.getElementById('sidebar-nav').style.display === 'block') {
+                toggleSidebar();
+            }
+        }
+
+        function navigate(direction) {
+            const newLesson = currentLesson + direction;
+            if (newLesson >= 1 && newLesson <= totalLessons) {
+                showLesson(newLesson);
+            }
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            if (currentLesson === 1) {
+                prevBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'block';
+            }
+
+            if (currentLesson === totalLessons) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'block';
+                // Update next button text
+                if (currentLesson === totalLessons - 1) {
+                    nextBtn.innerHTML = "النهاية 🏆";
+                } else {
+                    nextBtn.innerHTML = "الدرس التالي &larr;";
+                }
+            }
+        }
+
+        // Modal Functions
+        function openModal(buttonElement) {
+            // Get the HTML content from the hidden div directly next to the button
+            const explanationContent = buttonElement.nextElementSibling.innerHTML;
+            document.getElementById('modalBody').innerHTML = explanationContent;
+            
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            // Show modal and apply animations
+            modal.classList.remove('hidden');
+            // Trigger browser reflow to enable transition
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            modalBox.classList.remove('scale-95');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            // Reverse animations
+            modal.classList.add('opacity-0');
+            modalBox.classList.add('scale-95');
+            
+            // Hide completely after transition finishes
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Initialize syntax highlighting manually after DOM is fully ready
+        document.addEventListener('DOMContentLoaded', (event) => {
+            updateButtons();
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+    
+    <!-- Scripts for Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+</body>
+</html>

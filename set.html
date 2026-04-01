@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دورة احتراف الـ Set في C++ | المدرب محمد مجممي</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Tajawal for Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Prism.js for C++ Syntax Highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#3b82f6', // Blue 500
+                        secondary: '#1e293b', // Slate 800
+                        accent: '#f59e0b', // Amber 500
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        .lesson-content { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .lesson-content.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item { transition: all 0.2s ease; border-right: 4px solid transparent; }
+        .nav-item.active { 
+            background-color: #f1f5f9; 
+            border-right: 4px solid #3b82f6; 
+            color: #1e40af; 
+            font-weight: bold;
+        }
+        .nav-item:hover:not(.active) { background-color: #f8fafc; }
+        
+        /* Custom scrollbar for main content */
+        main::-webkit-scrollbar { width: 8px; }
+        main::-webkit-scrollbar-track { background: #f1f1f1; }
+        main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        main::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Prism overrides */
+        pre[class*="language-"] { border-radius: 0.75rem; margin-top: 0; margin-bottom: 0; padding-top: 2.5rem !important; }
+        .pro-tip { background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); border-right: 4px solid #f59e0b; }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen bg-slate-50 text-slate-800 overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-80 bg-white shadow-xl z-20 flex flex-col flex-shrink-0 md:h-screen">
+        <div class="p-6 bg-secondary text-white">
+            <h1 class="text-2xl font-black mb-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-blue-400 to-emerald-400">
+                أبطال البرمجة (C++)
+            </h1>
+            <p class="text-slate-300 text-sm">أسرار حاوية الـ Set للمسابقات</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="showLesson(1)" id="nav-1" class="nav-item active w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>1. القوة الخارقة (مقدمة)</span>
+                <span class="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">الأساسيات</span>
+            </button>
+            <button onclick="showLesson(2)" id="nav-2" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>2. صنع الصندوق الذكي</span>
+            </button>
+            <button onclick="showLesson(3)" id="nav-3" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>3. لوحة التحكم والعمليات</span>
+            </button>
+            <button onclick="showLesson(4)" id="nav-4" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>4. المعركة التجريبية (محاكاة)</span>
+                <span class="text-xs bg-emerald-100 text-emerald-600 px-2 py-1 rounded-full">تطبيق</span>
+            </button>
+            <button onclick="showLesson(5)" id="nav-5" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>5. رحلة الاستكشاف (Iterators)</span>
+            </button>
+            <button onclick="showLesson(6)" id="nav-6" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>6. عائلة الـ Sets (الأنواع)</span>
+                <span class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-full">متقدم</span>
+            </button>
+            <button onclick="showLesson(7)" id="nav-7" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>7. آلة تنظيف البيانات (التحدي)</span>
+                <span class="text-xs bg-accent text-white px-2 py-1 rounded-full shadow-sm">تحدي</span>
+            </button>
+        </nav>
+        
+        <!-- Footer / Signature -->
+        <div class="p-4 bg-slate-100 text-center border-t border-slate-200 mt-auto">
+            <p class="text-sm font-bold text-slate-600">إعداد وتصميم</p>
+            <p class="text-lg font-black text-primary mt-1">المدرب / محمد مجممي</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto scroll-smooth relative" id="main-content">
+        
+        <div class="max-w-4xl mx-auto p-6 md:p-10 pb-32">
+            
+            <!-- Lesson 1 -->
+            <section id="lesson-1" class="lesson-content active">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الأول: القوة الخارقة لحاوية الـ Set</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">التأسيس والتهيئة للمسابقات البرمجية (الأولمبياد المعلوماتي).</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                            <span>🎮</span> التمهيد الجاذب (تشبيه الصندوق السحري)
+                        </h3>
+                        <p class="mb-4 leading-relaxed">
+                            "تخيلوا أننا ننظم بطولة ألعاب إلكترونية في المدرسة، وفتحنا باب التسجيل. بعض الطلاب تحمسوا وضغطوا على زر التسجيل أكثر من مرة! الآن لدينا قائمة طويلة جداً فيها أسماء وأرقام مكررة وبشكل عشوائي. في المسابقات البرمجية، إذا حاولنا تنظيف هذه القائمة وترتيبها باستخدام المصفوفات العادية (Arrays)، سنكتب سطوراً كثيرة وسنضيع وقتاً ثميناً. هنا يتدخل بطلنا اليوم: <strong class="text-primary">الـ set</strong>."
+                        </p>
+                        <p class="leading-relaxed">الـ set ليس مجرد مصفوفة، بل هو <strong>"صندوق سحري ذكي"</strong> يتميز بثلاث قوى خارقة:</p>
+                        <ul class="list-disc list-inside mt-2 space-y-2 text-slate-700">
+                            <li><strong>قوة الفلترة (لا للتكرار):</strong> لديه حارس صارم يمنع دخول أي نسخة مقلدة.</li>
+                            <li><strong>قوة الترتيب التلقائي:</strong> أي شيء ترميه داخل هذا الصندوق، سيقوم بترتيبه فوراً (من الأصغر للأكبر).</li>
+                            <li><strong>قوة السرعة:</strong> يبحث عن العناصر بسرعة البرق باستخدام خوارزميات تعمل بوقت <code class="bg-slate-100 px-1 rounded">O(log n)</code>.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">تفكيك الكود (خطوة بخطوة)</h3>
+                        
+                        <p class="mb-2 font-bold text-slate-800">1. استدعاء الأداة (المكتبة الخاصة بها):</p>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">#include &lt;iostream&gt;</code>: مكتبة لطباعة المخرجات على الشاشة.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">#include &lt;set&gt;</code>: أمر استدعاء مكتبة الحاوية الذكية (set) لنتمكن من استخدامها.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">using namespace std;</code>: لتسهيل كتابة الأوامر دون الحاجة لتكرار كلمة <code>std::</code> قبل كل أمر طباعة.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;set&gt; // هذا هو أمر الاستدعاء للأداة من المكتبة
+using namespace std;</code></pre>
+                        </div>
+                        
+                        <p class="mt-6 mb-2 font-bold text-slate-800">2. إنشاء الصندوق وتعبئته بأرقام عشوائية ومكررة:</p>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">set&lt;int&gt;</code>: يخبر الكمبيوتر أننا نريد إنشاء حاوية ذكية مخصصة للأرقام الصحيحة فقط.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">numbers</code>: هو الاسم الذي اخترناه لهذه الحاوية.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">{5, 2, 9, 2, 1}</code>: تزويد الحاوية بقيم أولية. سيقوم الـ set تلقائياً بحذف الرقم (2) المكرر وترتيب البقية.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">int main() {
+    // أنشأنا set ووضعنا فيه 5 أرقام، لاحظوا أن الرقم 2 مكرر
+    set&lt;int&gt; numbers = {5, 2, 9, 2, 1};</code></pre>
+                        </div>
+
+                        <p class="mt-6 mb-2 font-bold text-slate-800">3. استعراض المحتويات وطباعتها:</p>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">for (int x : numbers)</code>: حلقة تكرارية حديثة تقرأ كالتالي: "لكل عنصر سمّه x متواجد داخل الصندوق numbers".</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">cout &lt;&lt; x &lt;&lt; " ";</code>: أمر طباعة يطبع العنصر الحالي x وبجانبه مسافة فارغة.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">    // اقرأها هكذا: "بالنسبة لكل رقم x موجود داخل الصندوق numbers..."
+    for (int x : numbers) {
+        cout &lt;&lt; x &lt;&lt; " "; // "...قم بطباعته مع مسافة"
+    }
+    return 0;
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-bold text-emerald-400 mb-2">شاشة المخرجات (Output):</h3>
+                        <pre dir="ltr" class="text-left text-xl font-mono text-white bg-transparent p-0 m-0 border-0">1 2 5 9</pre>
+                        <p class="mt-4 text-slate-300 text-sm border-t border-slate-600 pt-4">
+                            <strong>تحليل:</strong> اختفت الـ 2 المكررة بفضل (الحارس الصارم)، وظهرت الأرقام مرتبة بفضل (الترتيب التلقائي).
+                        </p>
+                    </div>
+
+                    <div class="pro-tip p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-accent mb-2 text-lg flex items-center gap-2">
+                            <span>💡</span> نصيحة مسابقات (Golden Rule)
+                        </h3>
+                        <p class="text-slate-700 leading-relaxed">
+                            في أي مسألة برمجية يُطلب منك فيها إيجاد <strong>"العناصر المميزة" (Distinct elements)</strong>، أو يُطلب منك البحث السريع جداً في قائمة أرقام تتغير باستمرار، يجب أن يتبادر الـ <code>set</code> إلى ذهنك فوراً كأول وأقوى خيار للحل!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 2 -->
+            <section id="lesson-2" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثاني: كيف نصنع الصندوق الذكي؟</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">تعلم كيفية استدعاء الحاوية، تخصيصها، وتهيئتها.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">مصنع الصناديق 🏭</h3>
+                        <p class="leading-relaxed mb-4">
+                            تخيلوا أن لدينا مصنعاً ذكياً، قبل أن نطلب منه صنع صندوق للحفظ، سيطرح علينا سؤالاً واحداً مهماً: <strong>"ما هو نوع الأشياء التي ستضعونها في هذا الصندوق؟"</strong><br>
+                            في البرمجة، يجب أن نضع "ملصقاً" يحدد نوع البيانات: أرقام؟ نصوص؟ أم حروف؟
+                        </p>
+                        
+                        <h4 class="font-bold mt-6 mb-2">1. تصنيع الصناديق وتحديد نوعها <code>&lt; &gt;</code></h4>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">set&lt;int&gt;</code>: تنشئ صندوقاً يقبل الأرقام الصحيحة فقط (مثل: 5, -10, 100).</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">set&lt;string&gt;</code>: تنشئ صندوقاً مخصصاً للنصوص والكلمات (مثل أسماء اللاعبين).</li>
+                                    <li>الكلمات <code>mySet</code> و <code>names</code> هي مجرد أسماء متغیرات يمكنك تغييرها كما تشاء.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">set&lt;int&gt; mySet;              // صندوق فارغ للأرقام الصحيحة
+set&lt;string&gt; names;           // صندوق فارغ للنصوص (أسماء اللاعبين)</code></pre>
+                        </div>
+
+                        <h4 class="font-bold mt-6 mb-2">2. الصندوق المجهز مسبقاً <code>{ }</code></h4>
+                        <p class="mb-2 text-slate-600">نستخدم الأقواس المعقوفة لتهيئة الـ set بقيم ابتدائية لحظة شرائه:</p>
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">char</code>: نوع بيانات مخصص للحروف المفردة.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">{'a', 'b', 'c'}</code>: بدلاً من إنشاء صندوق فارغ وإضافة الحروف واحداً تلو الآخر، قمنا بإنشائه وتعبئته في نفس السطر لاختصار الوقت.</li>
+                                </ul>
+                            </div>
+                            <pre dir="ltr" class="text-left"><code class="language-cpp">set&lt;char&gt; letters = {'a', 'b', 'c'}; // صندوق للحروف وبداخله 3 حروف جاهزة</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="pro-tip p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-accent mb-2 text-lg flex items-center gap-2">
+                            <span>💡</span> نصيحة مسابقات (Pro Tip)
+                        </h3>
+                        <p class="text-slate-700 leading-relaxed">
+                            اختيار النوع الصحيح للـ set يغير طريقة الترتيب التلقائي! <br>
+                            إذا استخدمت <code>set&lt;string&gt;</code> ووضعت أسماء ("Ziad", "Ali", "Badr")، فإن الـ set ذكي بما يكفي ليرتبها أبجدياً: <strong>"Ali" ثم "Badr" ثم "Ziad"</strong>. في المسابقات، هذا سيوفر عليك كتابة دوال الترتيب المعقدة.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 3 -->
+            <section id="lesson-3" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثالث: لوحة التحكم والعمليات</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">تعلم الأوامر الأساسية للتحكم في حاوية الـ set واستخدامها بذكاء وسرعة.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="leading-relaxed mb-6">
+                            تخيلوا أنكم تجلسون في "غرفة التحكم". أمامكم لوحة تحكم تحتوي على أزرار أساسية. سنقسمها إلى ثلاث مجموعات رئيسية لتسهيل حفظها أثناء المسابقات:
+                        </p>
+
+                        <h3 class="text-xl font-bold text-red-500 border-b pb-2 mb-4">المجموعة الأولى: أسلحة التعديل ⚔️</h3>
+                        <ul class="space-y-6 text-slate-700">
+                            <li>
+                                <strong class="text-lg">زر الإضافة <code>insert(x)</code>:</strong> إدخال عنصر جديد. إذا كان موجوداً مسبقاً سيتجاهله.
+                                <!-- Code Block with Popover -->
+                                <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                    <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                    <div class="hidden">
+                                        <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">s.insert(5)</code>: تأمر الحاوية بإضافة الرقم 5. الحاوية سترتب الرقم في مكانه الصحيح تلقائياً وترفضه إذا كان موجوداً مسبقاً.</li>
+                                        </ul>
+                                    </div>
+                                    <pre dir="ltr" class="text-left"><code class="language-cpp">s.insert(5); // رمينا الرقم 5 داخل الصندوق</code></pre>
+                                </div>
+                            </li>
+                            <li>
+                                <strong class="text-lg">زر الممحاة <code>erase(x)</code>:</strong> يحذف عنصراً محدداً إن وجده.
+                                <!-- Code Block with Popover -->
+                                <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                    <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                    <div class="hidden">
+                                        <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">s.erase(5)</code>: تبحث عن الرقم 5 وتزيله نهائياً. وإذا لم يكن موجوداً من الأساس فلن يتسبب الأمر في أي أخطاء أو توقف للبرنامج.</li>
+                                        </ul>
+                                    </div>
+                                    <pre dir="ltr" class="text-left"><code class="language-cpp">s.erase(5); // مسحنا الرقم 5 من الصندوق</code></pre>
+                                </div>
+                            </li>
+                            <li>
+                                <strong class="text-lg">زر التدمير الشامل <code>clear()</code>:</strong> يفرغ الصندوق تماماً بضربة واحدة.
+                                <!-- Code Block with Popover -->
+                                <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                    <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                    <div class="hidden">
+                                        <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">s.clear()</code>: تفريغ الحاوية بالكامل. دالة مهمة جداً في المسابقات عندما تحتاج لتصفير الحاوية قبل البدء في معالجة سيناريو جديد.</li>
+                                        </ul>
+                                    </div>
+                                    <pre dir="ltr" class="text-left"><code class="language-cpp">s.clear(); // حذفنا كل العناصر بلا استثناء</code></pre>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-xl font-bold text-blue-500 border-b pb-2 mt-10 mb-4">المجموعة الثانية: أجهزة الرادار 📡</h3>
+                        <ul class="space-y-6 text-slate-700">
+                            <li>
+                                <strong class="text-lg">الرادار البسيط <code>count(x)</code>:</strong> الأفضل للمبتدئين! يعيد 1 إذا وجد العنصر و 0 إذا لم يجده.
+                                <!-- Code Block with Popover -->
+                                <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                    <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                    <div class="hidden">
+                                        <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">s.count(5)</code>: تسأل الحاوية كم مرة تكرر الرقم 5؟ وبما أن التكرار ممنوع، فستكون الإجابة إما 1 (أي أنه موجود) أو 0 (غير موجود).</li>
+                                        </ul>
+                                    </div>
+                                    <pre dir="ltr" class="text-left"><code class="language-cpp">if (s.count(5)) {
+    // الرقم موجود! نفذ الكود هنا
+}</code></pre>
+                                </div>
+                            </li>
+                            <li>
+                                <strong class="text-lg">الرادار المتقدم <code>find(x)</code>:</strong> يعيد "مؤشراً". إذا لم يجد العنصر سيصل للنهاية <code>s.end()</code>.
+                                <!-- Code Block with Popover -->
+                                <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                    <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                    <div class="hidden">
+                                        <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">s.find(5)</code>: دالة للمحترفين تبحث عن مكان الرقم.</li>
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">!= s.end()</code>: تتأكد من أن عملية البحث لم تصل لخط النهاية الوهمي، مما يعني أننا اصطدنا العنصر المطلوب بنجاح!</li>
+                                        </ul>
+                                    </div>
+                                    <pre dir="ltr" class="text-left"><code class="language-cpp">if (s.find(5) != s.end()) {
+    // بحثنا ولم نصل للنهاية فارغي الأيدي، إذن هو موجود!
+}</code></pre>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <h3 class="text-xl font-bold text-emerald-500 border-b pb-2 mt-10 mb-4">المجموعة الثالثة: شاشة المعلومات 🖥️</h3>
+                        <ul class="space-y-6 text-slate-700">
+                            <li>
+                                <strong class="text-lg">عداد العناصر <code>size()</code>:</strong> يخبرنا بعدد العناصر المختلفة.
+                                <!-- Code Block with Popover -->
+                                <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                    <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                    <div class="hidden">
+                                        <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">s.size()</code>: تعيد عدد العناصر الفعلي المخزن حالياً. لا تنسَ أن الأرقام المكررة لم يتم احتسابها.</li>
+                                        </ul>
+                                    </div>
+                                    <pre dir="ltr" class="text-left"><code class="language-cpp">int total = s.size();</code></pre>
+                                </div>
+                            </li>
+                            <li>
+                                <strong class="text-lg">كاشف الفراغ <code>empty()</code>:</strong> للتحقق السريع هل الصندوق فارغ (true).
+                                <!-- Code Block with Popover -->
+                                <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                    <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                    <div class="hidden">
+                                        <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                            <li><code class="bg-slate-100 px-1 rounded text-primary">s.empty()</code>: دالة سريعة تُعيد قيمة منطقية (True) إذا لم يكن هناك أي بيانات، وهي أسرع وأفضل أداءً من كتابة `s.size() == 0`.</li>
+                                        </ul>
+                                    </div>
+                                    <pre dir="ltr" class="text-left"><code class="language-cpp">if (s.empty()) { /* الصندوق فارغ */ }</code></pre>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 4 -->
+            <section id="lesson-4" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الرابع: المعركة التجريبية</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">محاكاة حية لدمج العمليات (الإنشاء، الإضافة، البحث، الحذف) في برنامج واحد.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="leading-relaxed mb-4">
+                            سنبرمج نظاماً لتتبع اللاعبين النشطين في سيرفر لعبة. اللاعبون يدخلون (إضافة)، النظام يتأكد (بحث)، وبعضهم يغادر (حذف).
+                        </p>
+                        
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">s.insert(...)</code>: تم استخدامها لإدخال اللاعبين للسيرفر. إدخال اللاعب رقم 3 مرة أخرى تم تجاهله بصمت.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">s.count(3)</code>: استخدمنا الرادار السريع للتأكد من تواجد اللاعب رقم 3 قبل تنفيذ الأوامر.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">s.erase(1)</code>: تم طرد أو حذف اللاعب رقم 1 من السيرفر.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">for (int x : s)</code>: استخدمناها مرتين لطباعة القائمة ورؤية التغييرات الحية.</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; s; // أنشأنا السيرفر
+    
+    // 1. اللاعبون يدخلون
+    s.insert(3);
+    s.insert(1);
+    s.insert(4);
+    s.insert(3); // لاعب يحاول الدخول مرتين بالخطأ (سيتم تجاهله)
+    
+    // 2. طباعة القائمة (ستظهر مرتبة)
+    cout &lt;&lt; "Elements: ";
+    for (int x : s) cout &lt;&lt; x &lt;&lt; " ";
+    cout &lt;&lt; endl;
+    
+    // 3. البحث بالرادار
+    if (s.count(3)) {
+        cout &lt;&lt; "3 is in the set" &lt;&lt; endl;
+    }
+    
+    // 4. خروج لاعب من السيرفر
+    s.erase(1); // حذف الرقم 1
+    
+    cout &lt;&lt; "After removing 1: ";
+    for (int x : s) cout &lt;&lt; x &lt;&lt; " ";
+    
+    return 0;
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-6 rounded-xl shadow-md">
+                        <h3 class="text-lg font-bold text-emerald-400 mb-2">شاشة المخرجات:</h3>
+<pre dir="ltr" class="text-left text-lg font-mono text-white leading-loose bg-transparent p-0 border-0">Elements: 1 3 4
+3 is in the set
+After removing 1: 3 4</pre>
+                    </div>
+
+                    <div class="pro-tip p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-accent mb-2 text-lg flex items-center gap-2">
+                            <span>💡</span> مسائل الاستعلامات الديناميكية
+                        </h3>
+                        <p class="text-slate-700 leading-relaxed">
+                            في المسابقات، الأسئلة التي تطلب منك تتبع أحداث متغيرة (يدخل، يخرج، هل هو موجود؟) تُسمى <strong>Dynamic Queries</strong>. هذا الكود البسيط هو الهيكل الأساسي لحل 90% من هذه المسائل بسرعة خيالية تمنع تجاوز الوقت (Time Limit)!
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 5 -->
+            <section id="lesson-5" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الخامس: رحلة الاستكشاف (Iterators)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">تعلم كيفية المرور على جميع العناصر باستخدام طريقتين مختلفتين.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">الطريقة الأولى: القطار السريع 🚆</h3>
+                        <p class="text-slate-700 mb-2">الأسهل والأكثر راحة. يمر تلقائياً على كل محطة (عنصر) دون تعقيد:</p>
+                        
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li>تُسمى هذه الطريقة في لغة C++ بـ (Range-based for loop).</li>
+                                    <li>الأسلوب الأمثل والأسرع لطباعة كافة المحتويات دون الدخول في تفاصيل المؤشرات.</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">for (int x : s) {
+    cout &lt;&lt; x &lt;&lt; " ";
+}</code></pre>
+                        </div>
+                        <p class="mt-2 text-sm text-slate-500">نستخدمه لطباعة كل العناصر بسرعة وتجنب أخطاء الفهرسة.</p>
+
+                        <h3 class="text-xl font-bold text-purple-600 mt-8 mb-3">الطريقة الثانية: المفتش المحترف (Iterator) 🕵️</h3>
+                        <p class="text-slate-700 mb-2">
+                            في المسابقات المتقدمة نحتاج إلى "مفتش" يمسك بيده كشاف إضاءة (مؤشر) يتحرك خطوة بخطوة.
+                        </p>
+
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">auto it</code>: كلمة auto تجعل الكمبيوتر يستنتج نوع المفتش برمجياً لتوفير الوقت في المسابقات.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">s.begin()</code>: توجيه المؤشر للوقوف على أول عنصر في الصندوق.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">s.end()</code>: علامة نهاية الصندوق الوهمية (شرط التوقف).</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">it++</code>: اطلب من المؤشر الانتقال للخطوة التالية.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">*it</code>: قراءة القيمة الفعلية الموجودة في المكان الذي يقف عليه المؤشر.</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">for (auto it = s.begin(); it != s.end(); it++) {
+    cout &lt;&lt; *it &lt;&lt; " ";
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 6 -->
+            <section id="lesson-6" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس السادس: عائلة الـ Sets</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">التعرف على الأنواع الثلاثة واختيار السلاح المناسب للمسألة.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Type 1 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500">
+                            <h3 class="text-xl font-bold text-blue-600 mb-2">1. الأخ الأكبر (set)</h3>
+                            <p class="text-sm text-slate-600 mb-4">المنظم الصارم</p>
+                            <ul class="text-sm space-y-2 text-slate-700 mb-4">
+                                <li>✅ مرتب دائماً</li>
+                                <li>❌ يرفض التكرار</li>
+                                <li>⚡ سرعة: O(log n)</li>
+                            </ul>
+                            <!-- Code Block with Popover -->
+                            <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                <div class="hidden">
+                                    <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                        <li>النوع الأساسي الذي درسناه.</li>
+                                        <li>يستخدم شجرة متوازنة برمجياً لضمان ترتيب العناصر دائماً وحذف المكررات.</li>
+                                    </ul>
+                                </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">set&lt;int&gt; s;</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Type 2 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-green-500">
+                            <h3 class="text-xl font-bold text-green-600 mb-2">2. الأخ الأوسط (multiset)</h3>
+                            <p class="text-sm text-slate-600 mb-4">المنظم محب التجميع</p>
+                            <ul class="text-sm space-y-2 text-slate-700 mb-4">
+                                <li>✅ مرتب دائماً</li>
+                                <li>✅ يسمح بالتكرار!</li>
+                                <li>⚡ سرعة: O(log n)</li>
+                            </ul>
+                            <!-- Code Block with Popover -->
+                            <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                <div class="hidden">
+                                    <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                        <li>يحتفظ بجميع القيم حتى لو تكررت.</li>
+                                        <li>ممتاز جداً لترتيب درجات الطلاب حيث تتشابه بعض الدرجات ويجب الاحتفاظ بها جميعاً.</li>
+                                    </ul>
+                                </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">multiset&lt;int&gt; ms;</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Type 3 -->
+                        <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-purple-500">
+                            <h3 class="text-xl font-bold text-purple-600 mb-2">3. الأخ المتمرد (unordered_set)</h3>
+                            <p class="text-sm text-slate-600 mb-4">البرق الفوضوي (Hashing)</p>
+                            <ul class="text-sm space-y-2 text-slate-700 mb-4">
+                                <li>❌ غير مرتب (فوضوي)</li>
+                                <li>❌ يرفض التكرار</li>
+                                <li>🚀 سرعة: O(1) خارقة!</li>
+                            </ul>
+                            <!-- Code Block with Popover -->
+                            <div class="relative group mt-2 shadow-sm rounded-xl overflow-hidden">
+                                <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                                <div class="hidden">
+                                    <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                        <li>السلاح السري في المسابقات!</li>
+                                        <li>يستخدم تقنية الـ Hashing ليقوم بعمليات البحث والإضافة في وقت ثابت O(1) تقريباً.</li>
+                                        <li>نستخدمه إذا كان الترتيب غير مهم ونتعرض لخطر تجاوز الوقت (Time Limit).</li>
+                                    </ul>
+                                </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">unordered_set&lt;int&gt; us;</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pro-tip p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-accent mb-2 text-lg">💡 القاعدة الذهبية الثلاثية للمسابقات</h3>
+                        <ol class="list-decimal list-inside space-y-2 text-slate-700">
+                            <li>ترتيب مطلوب + لا تكرار = <strong>استخدم <code>set</code></strong>.</li>
+                            <li>ترتيب مطلوب + يوجد تكرار = <strong>استخدم <code>multiset</code></strong>.</li>
+                            <li>الترتيب غير مهم + همك الوحيد السرعة القصوى = <strong>استخدم <code>unordered_set</code></strong>.</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 7 -->
+            <section id="lesson-7" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس السابع: آلة تنظيف البيانات</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">تحدي عملي: إزالة المكررات من المصفوفات وترتيبها بأقل عدد ممكن من الأسطر.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="leading-relaxed mb-4">
+                            <strong>المشكلة:</strong> لدينا قائمة عادية (Vector) تحتوي على أرقام مكررة وعشوائية. مطلوب قائمة نهائية نظيفة ومرتبة. بدلاً من كتابة كود طويل ومعقد للبحث والحذف، سنصب القائمة في "المصفاة الذكية".
+                        </p>
+                        
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden">
+                            <button onclick="openModal(this)" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            <div class="hidden">
+                                <ul class="list-disc list-inside space-y-2 text-slate-700 font-medium">
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">#include &lt;vector&gt;</code>: أمر استدعاء القوائم العادية (التي تقبل العشوائية والتكرار).</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">nums</code>: مصفوفة فوضوية بها الرقم 2 والرقم 3 مكرران.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">unique.insert(x)</code>: بداخل الحلقة، نأخذ كل رقم ونرميه في حاوية set. الحاوية سترتب الأرقام فوراً وتطرد النسخ المكررة.</li>
+                                    <li><code class="bg-slate-100 px-1 rounded text-primary">cout &lt;&lt; x</code>: في الحلقة الأخيرة، نقوم بعرض النتيجة النظيفة والمرتبة.</li>
+                                </ul>
+                            </div>
+<pre dir="ltr" class="text-left"><code class="language-cpp">#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;vector&gt; // أمر استدعاء القوائم العادية (تقبل الفوضى)
+using namespace std;
+
+int main() {
+    // 1. القائمة الفوضوية
+    vector&lt;int&gt; nums = {1, 2, 2, 3, 4, 3, 1};
+    
+    // 2. المصفاة الذكية (الصندوق)
+    set&lt;int&gt; unique;
+    
+    // 3. عملية التنظيف (الصب داخل المصفاة)
+    for (int x : nums) {
+        unique.insert(x); // المصفاة سترفض التكرار وترتب تلقائياً
+    }
+    
+    // 4. عرض النتيجة
+    for (int x : unique) {
+        cout &lt;&lt; x &lt;&lt; " ";
+    }
+    
+    return 0;
+}</code></pre>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-800 text-white p-6 rounded-xl shadow-md text-center">
+                        <h3 class="text-lg font-bold text-emerald-400 mb-2">المخرجات النهائية النظيفة:</h3>
+                        <pre dir="ltr" class="text-center text-2xl font-mono text-white bg-transparent p-0 border-0">1 2 3 4</pre>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-200 p-6 rounded-xl shadow-sm text-center">
+                        <h3 class="text-2xl mb-2 font-black">🎉 تهانينا يا بطل! 🎉</h3>
+                        <p class="text-emerald-800 font-medium">
+                            لقد أتقنت الآن واحدة من أهم حاويات لغة C++ في عالم البرمجة التنافسية. أنت جاهز الآن للانطلاق نحو مستويات أعلى مثل (Maps). 
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-12 pt-6 border-t border-slate-200">
+                <button id="prev-btn" onclick="navigate(-1)" class="px-6 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors hidden font-bold">
+                    &rarr; الدرس السابق
+                </button>
+                <div class="flex-1"></div> <!-- Spacer -->
+                <button id="next-btn" onclick="navigate(1)" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors font-bold shadow-md">
+                    الدرس التالي &larr;
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal for Code Explanation -->
+    <div id="codeModal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-300" id="modalContentBlock">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <h3 class="text-xl font-bold text-primary flex items-center gap-2">
+                    <span class="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center font-black">!</span>
+                    شرح الكود البرمجي
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 text-3xl leading-none">&times;</button>
+            </div>
+            <!-- Modal Body Content -->
+            <div id="modalBody" class="mb-6 overflow-y-auto max-h-96 pr-2">
+                <!-- Dynamic Content Will Be Inserted Here -->
+            </div>
+            <button onclick="closeModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 rounded-lg transition-colors border border-slate-200">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript for Navigation and Modals -->
+    <script>
+        let currentLesson = 1;
+        const totalLessons = 7;
+
+        function showLesson(lessonNumber) {
+            // Hide all lessons
+            document.querySelectorAll('.lesson-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Show selected lesson
+            document.getElementById(`lesson-${lessonNumber}`).classList.add('active');
+            
+            // Highlight selected nav item
+            document.getElementById(`nav-${lessonNumber}`).classList.add('active');
+            
+            currentLesson = lessonNumber;
+            updateButtons();
+            
+            // Scroll to top of main content
+            document.getElementById('main-content').scrollTop = 0;
+            
+            // Close sidebar on mobile after clicking
+            if (window.innerWidth < 768 && document.getElementById('sidebar-nav').style.display === 'block') {
+                toggleSidebar();
+            }
+        }
+
+        function navigate(direction) {
+            const newLesson = currentLesson + direction;
+            if (newLesson >= 1 && newLesson <= totalLessons) {
+                showLesson(newLesson);
+            }
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            if (currentLesson === 1) {
+                prevBtn.style.display = 'none';
+            } else {
+                prevBtn.style.display = 'block';
+            }
+
+            if (currentLesson === totalLessons) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'block';
+                // Update next button text
+                if (currentLesson === totalLessons - 1) {
+                    nextBtn.innerHTML = "التحدي الأخير 🏆";
+                } else {
+                    nextBtn.innerHTML = "الدرس التالي &larr;";
+                }
+            }
+        }
+
+        // Modal Functions
+        function openModal(buttonElement) {
+            // Get the HTML content from the hidden div directly next to the button
+            const explanationContent = buttonElement.nextElementSibling.innerHTML;
+            document.getElementById('modalBody').innerHTML = explanationContent;
+            
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            // Show modal and apply animations
+            modal.classList.remove('hidden');
+            // Trigger browser reflow to enable transition
+            void modal.offsetWidth;
+            modal.classList.remove('opacity-0');
+            modalBox.classList.remove('scale-95');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            // Reverse animations
+            modal.classList.add('opacity-0');
+            modalBox.classList.add('scale-95');
+            
+            // Hide completely after transition finishes
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Initialize syntax highlighting manually after DOM is fully ready
+        document.addEventListener('DOMContentLoaded', (event) => {
+            updateButtons();
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+    </script>
+    
+    <!-- Scripts for Prism.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-c.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-cpp.min.js"></script>
+</body>
+</html>
