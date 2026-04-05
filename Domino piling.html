@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دورة تغطية الدومينو (Domino Piling) | المدرب محمد مجممي</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Tajawal for Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#e11d48', // Rose 600 (لون الدومينو)
+                        secondary: '#0f172a', // Slate 900
+                        accent: '#f59e0b', // Amber 500
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        .lesson-content { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .lesson-content.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item { transition: all 0.2s ease; border-right: 4px solid transparent; }
+        .nav-item.active { 
+            background-color: #fff1f2; 
+            border-right: 4px solid #e11d48; 
+            color: #be123c; 
+            font-weight: bold;
+        }
+        .nav-item:hover:not(.active) { background-color: #f8fafc; }
+        
+        /* Custom scrollbar */
+        main::-webkit-scrollbar, .sim-grid-container::-webkit-scrollbar { width: 8px; height: 8px; }
+        main::-webkit-scrollbar-track, .sim-grid-container::-webkit-scrollbar-track { background: #f1f1f1; }
+        main::-webkit-scrollbar-thumb, .sim-grid-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        main::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .pro-tip { background: linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%); border-right: 4px solid #e11d48; }
+        
+        /* Code Highlighting Styles */
+        .code-line { transition: all 0.3s ease; padding: 0.25rem 0.5rem; margin: 0.1rem 0; border-radius: 0.25rem; border-left: 4px solid transparent; color: #e2e8f0; } 
+        .code-line.active-line { background-color: rgba(225, 29, 72, 0.3); border-left: 4px solid #fb7185; font-weight: bold; color: #ffffff; } 
+        .var-box { transition: all 0.3s ease; }
+        .var-updated { transform: scale(1.1); background-color: #ffe4e6; color: #be123c; border-color: #e11d48; }
+        
+        /* Mathematical Equations LTR Fix */
+        .math-eq { direction: ltr; display: inline-block; font-family: monospace; font-weight: bold; padding: 0.1rem 0.4rem; border-radius: 0.25rem; }
+
+        /* Domino CSS Grid */
+        .domino-cell { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .domino-cell:hover { transform: scale(1.05) translateY(-2px); z-index: 30; box-shadow: 0 10px 15px -3px rgba(225, 29, 72, 0.5); }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen bg-slate-50 text-slate-800 overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-80 bg-white shadow-xl z-20 flex flex-col flex-shrink-0 md:h-screen">
+        <div class="p-6 bg-secondary text-white">
+            <h1 class="text-2xl font-black mb-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-rose-400 to-pink-500">
+                أبطال البرمجة (C++)
+            </h1>
+            <p class="text-slate-300 text-sm">تغطية الدومينو (Math in CP)</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="showLesson(1)" id="nav-1" class="nav-item active w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>1. التمهيد (تحدي الرقعة)</span>
+                <span class="text-xs bg-rose-100 text-rose-700 px-2 py-1 rounded-full">مقدمة</span>
+            </button>
+            <button onclick="showLesson(2)" id="nav-2" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>2. التحليل الرياضي للحالات</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">المنطق</span>
+            </button>
+            <button onclick="showLesson(3)" id="nav-3" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>3. تفكيك الكود الأساسي</span>
+            </button>
+            <button onclick="showLesson(4)" id="nav-4" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>4. المشغل التفاعلي للكود</span>
+                <span class="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded-full shadow-sm">تتبع</span>
+            </button>
+            <button onclick="showLesson(5)" id="nav-5" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>5. سر المحترفين (سطر واحد!)</span>
+                <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">O(1)</span>
+            </button>
+            <button onclick="showLesson(6)" id="nav-6" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>6. معمل الدومينو (محاكاة)</span>
+                <span class="text-xs bg-accent text-white px-2 py-1 rounded-full shadow-md animate-pulse">بصري</span>
+            </button>
+        </nav>
+        
+        <!-- Footer / Signature -->
+        <div class="p-4 bg-slate-100 text-center border-t border-slate-200 mt-auto">
+            <p class="text-sm font-bold text-slate-600">إعداد وتصميم</p>
+            <p class="text-lg font-black text-primary mt-1">المدرب / محمد مجممي</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto scroll-smooth relative" id="main-content">
+        
+        <div class="max-w-4xl mx-auto p-6 md:p-10 pb-32">
+            
+            <!-- Lesson 1 -->
+            <section id="lesson-1" class="lesson-content active">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الأول: تحدي رقعة الدومينو</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">كيف نغطي مساحة ثنائية الأبعاد رياضياً؟</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3 flex items-center gap-2">
+                            <span>🧩</span> المشكلة المطروحة
+                        </h3>
+                        <p class="mb-4 leading-relaxed text-slate-700">
+                            تخيل أن لديك رقعة مستطيلة (مصفوفة ثنائية الأبعاد) تتكون من <span dir="ltr" class="inline-block font-bold">M</span> <strong>عمود</strong> و <span dir="ltr" class="inline-block font-bold">N</span> <strong>صف</strong>. بداخل هذه الرقعة مربعات صغيرة.<br>
+                            ولديك عدد غير محدود من قطع الدومينو. كل قطعة دومينو حجمها <span dir="ltr" class="inline-block font-bold text-rose-600">2 &times; 1</span> (أي تغطي مربعين متجاورين بالضبط).
+                        </p>
+                        
+                        <div class="bg-rose-50 border border-rose-200 p-5 rounded-lg mt-4 shadow-inner">
+                            <h4 class="font-bold text-rose-800 mb-2">شروط المسابقة الصارمة:</h4>
+                            <ul class="list-disc list-inside space-y-2 text-rose-900 font-medium">
+                                <li>كل قطعة يجب أن تغطي خانتين كاملتين (لا يمكن كسرها).</li>
+                                <li>يمنع تقاطع أو تداخل القطع مع بعضها البعض.</li>
+                                <li>يجب أن تكون جميع القطع داخل حدود الرقعة بالكامل.</li>
+                            </ul>
+                            <p class="mt-4 font-black text-rose-700 text-lg border-t border-rose-200 pt-3">الهدف: ما هو "أكبر عدد ممكن" من قطع الدومينو التي يمكننا وضعها؟</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 2 -->
+            <section id="lesson-2" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثاني: التحليل الرياضي للحالات</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">الكمبيوتر لا يحتاج لرسم الرقعة، يحتاج فقط للرياضيات!</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="leading-relaxed mb-6 text-slate-700">
+                            عدد المربعات الكلي في الرقعة هو المساحة <span dir="ltr" class="math-eq bg-slate-100 text-slate-800">(N * M)</span>. وبما أن كل قطعة تغطي مربعين، فمنطقياً سنقسم المساحة الكلية على 2. لكن دعونا نثبت ذلك علمياً من خلال دراسة 3 حالات:
+                        </p>
+                        
+                        <div class="space-y-6">
+                            <!-- Case 1 -->
+                            <div class="border-r-4 border-blue-500 pr-4">
+                                <h4 class="font-bold text-blue-700 text-lg flex items-center gap-2">
+                                    <span>1️⃣</span> الحالة الأولى: عدد الصفوف (N) زوجي
+                                </h4>
+                                <p class="text-slate-600 mt-2 text-sm leading-relaxed">
+                                    إذا كان <span dir="ltr" class="inline-block font-bold">N</span> زوجياً <span dir="ltr" class="math-eq bg-slate-100 text-slate-600 border border-slate-200">(N % 2 == 0)</span>، يمكننا تغطية المصفوفة بالكامل بوضع القطع بشكل عمودي تماماً، ولن يتبقى أي فراغ. 
+                                    <br><strong class="text-slate-800">المعادلة:</strong> عدد القطع = <span dir="ltr" class="math-eq bg-blue-100 text-blue-800 border border-blue-200 text-base">(N * M) / 2</span>
+                                </p>
+                            </div>
+
+                            <!-- Case 2 -->
+                            <div class="border-r-4 border-emerald-500 pr-4">
+                                <h4 class="font-bold text-emerald-700 text-lg flex items-center gap-2">
+                                    <span>2️⃣</span> الحالة الثانية: عدد الأعمدة (M) زوجي
+                                </h4>
+                                <p class="text-slate-600 mt-2 text-sm leading-relaxed">
+                                    بشكل مشابه، إذا كان <span dir="ltr" class="inline-block font-bold">M</span> زوجياً <span dir="ltr" class="math-eq bg-slate-100 text-slate-600 border border-slate-200">(M % 2 == 0)</span>، نضع القطع بشكل أفقي لتغطية كل شيء دون فراغات.
+                                    <br><strong class="text-slate-800">المعادلة:</strong> عدد القطع = <span dir="ltr" class="math-eq bg-emerald-100 text-emerald-800 border border-emerald-200 text-base">(N * M) / 2</span>
+                                </p>
+                            </div>
+
+                            <!-- Case 3 -->
+                            <div class="border-r-4 border-rose-500 pr-4 bg-rose-50 p-4 rounded-l-lg">
+                                <h4 class="font-bold text-rose-700 text-lg flex items-center gap-2">
+                                    <span>3️⃣</span> الحالة الثالثة: كلا العددين (N و M) فرديان
+                                </h4>
+                                <p class="text-rose-900 mt-2 text-sm leading-relaxed font-medium">
+                                    هنا التحدي! لأن ناتج المساحة <span dir="ltr" class="math-eq bg-rose-200 text-rose-900 border border-rose-300">(N * M)</span> سيكون رقماً فردياً. 
+                                    نضع القطع بشكل عمودي حتى يتبقى صف أخير واحد (لأن <span dir="ltr" class="inline-block font-bold">N</span> فردي). وفي هذا الصف نضعها أفقياً حتى تتبقى <strong>خانة واحدة فقط</strong> في الزاوية لا يمكن تغطيتها.
+                                    <br><br>
+                                    <strong class="text-rose-800">المعادلة:</strong> نطرح الخانة الفارغة ثم نقسم: <span dir="ltr" class="math-eq bg-white text-rose-700 border border-rose-300 text-base shadow-sm">(N * M - 1) / 2</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 3 -->
+            <section id="lesson-3" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثالث: تفكيك الكود الأساسي</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">ترجمة الحالات الرياضية الثلاث إلى كود C++.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="leading-relaxed mb-4 text-slate-700">
+                            اضغط على علامة التعجب <span class="bg-amber-100 text-amber-600 w-6 h-6 inline-flex items-center justify-center rounded-full font-black text-sm mx-1">!</span> بجوار الكود لتفهم وظيفة كل سطر.
+                        </p>
+
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden border border-slate-800">
+                            <!-- Fixed the button to use explicit ID instead of traversing DOM -->
+                            <button onclick="openModal('exp-1')" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            
+                            <!-- Hidden explanation content -->
+                            <div id="exp-1" class="hidden">
+                                <ul class="list-disc list-inside space-y-4 text-slate-700 font-medium text-sm">
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-primary border border-slate-200">cin &gt;&gt; N &gt;&gt; M;</span><br> تعريف المتغيرات واستقبال أبعاد الرقعة من نظام التحكيم في المسابقة.</li>
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-blue-600 border border-slate-200">if (N % 2 == 0)</span><br> يختبر الحالة الأولى. إذا كان الباقي صفر (N زوجي)، يطبع النصف.</li>
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-emerald-600 border border-slate-200">else if (M % 2 == 0)</span><br> يختبر الحالة الثانية. إذا كان M زوجي، يطبع النصف أيضاً.</li>
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-rose-600 border border-slate-200">else</span><br> إذا فشل الشرطان السابقان، فهذا يعني حتماً أن كلاهما فردي (الحالة الثالثة). فيطرح 1 من المساحة الكلية ثم يقسم على 2.</li>
+                                </ul>
+                            </div>
+
+                            <pre dir="ltr" class="text-left m-0 rounded-none"><code class="language-cpp">#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int N, M;
+    cin &gt;&gt; N &gt;&gt; M; // إدخال أبعاد المصفوفة
+
+    // الحالة الأولى: الصفوف زوجية
+    if (N % 2 == 0) {
+        cout &lt;&lt; (N * M) / 2 &lt;&lt; endl;
+    }
+    // الحالة الثانية: الأعمدة زوجية
+    else if (M % 2 == 0) {
+        cout &lt;&lt; (N * M) / 2 &lt;&lt; endl;
+    }
+    // الحالة الثالثة: كلاهما فردي
+    else {
+        cout &lt;&lt; (N * M - 1) / 2 &lt;&lt; endl;
+    }
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 4 -->
+            <section id="lesson-4" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الرابع: التتبع التفاعلي (المشغل الذكي)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">لنجرب تتبع كود الرقعة ذات الـ 3 صفوف و 3 أعمدة سطراً بسطر.</p>
+                </header>
+
+                <!-- Interactive Code Stepper -->
+                <div class="bg-secondary rounded-xl shadow-2xl overflow-hidden flex flex-col md:flex-row border border-slate-700">
+                    
+                    <!-- Left Side: Variables & Controls (RTL) -->
+                    <div class="w-full md:w-1/3 bg-slate-800 p-6 flex flex-col border-b md:border-b-0 md:border-l border-slate-700">
+                        <h3 class="text-white font-bold text-lg mb-4 border-b border-slate-600 pb-2">شاشة المراقبة</h3>
+                        
+                        <!-- Variables -->
+                        <div class="space-y-4 mb-6 flex-1">
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <span class="text-slate-400 text-sm block mb-1">الصفوف (N)</span>
+                                    <div id="var-n" class="var-box bg-slate-700 text-blue-300 font-mono text-2xl px-2 py-2 rounded-lg border border-slate-600 font-bold text-center" dir="ltr">3</div>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="text-slate-400 text-sm block mb-1">الأعمدة (M)</span>
+                                    <div id="var-m" class="var-box bg-slate-700 text-blue-300 font-mono text-2xl px-2 py-2 rounded-lg border border-slate-600 font-bold text-center" dir="ltr">3</div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-sm block mb-1">المساحة (N * M)</span>
+                                <div id="var-area" class="var-box bg-slate-700 text-amber-400 font-mono text-2xl px-4 py-2 rounded-lg border border-slate-600 font-bold text-center" dir="ltr">9</div>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-sm block mb-1">النتيجة (الطباعة)</span>
+                                <div id="var-out" class="var-box bg-slate-700 text-emerald-400 font-mono text-2xl px-4 py-2 rounded-lg border border-slate-600 font-bold text-center" dir="ltr">-</div>
+                            </div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="space-y-3">
+                            <button onclick="nextStep()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg transform active:scale-95 flex justify-center items-center gap-2">
+                                <span>الخطوة التالية</span>
+                                <span>&darr;</span>
+                            </button>
+                            <button onclick="resetStepper()" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded-lg transition-colors text-sm">
+                                إعادة التشغيل
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: The Code & Explanation (LTR Code) -->
+                    <div class="w-full md:w-2/3 flex flex-col">
+                        <!-- C++ Code: High Contrast -->
+                        <div class="p-6 bg-[#1e1e1e] text-slate-200 font-mono text-sm md:text-base leading-relaxed" dir="ltr">
+                            <div class="text-slate-500 mb-2">int main() {<br>&nbsp;&nbsp;int N = 3, M = 3;</div>
+                            
+                            <div id="code-line-1" class="code-line"><span class="text-purple-400">if</span> (N % <span class="text-yellow-300">2</span> == <span class="text-yellow-300">0</span>) {</div>
+                            <div id="code-line-2" class="code-line pl-8"><span class="text-blue-400">cout</span> &lt;&lt; (N * M) / <span class="text-yellow-300">2</span> &lt;&lt; <span class="text-blue-400">endl</span>;</div>
+                            <div id="code-line-3" class="code-line">}</div>
+                            <div id="code-line-4" class="code-line"><span class="text-purple-400">else if</span> (M % <span class="text-yellow-300">2</span> == <span class="text-yellow-300">0</span>) {</div>
+                            <div id="code-line-5" class="code-line pl-8"><span class="text-blue-400">cout</span> &lt;&lt; (N * M) / <span class="text-yellow-300">2</span> &lt;&lt; <span class="text-blue-400">endl</span>;</div>
+                            <div id="code-line-6" class="code-line">}</div>
+                            <div id="code-line-7" class="code-line"><span class="text-purple-400">else</span> {</div>
+                            <div id="code-line-8" class="code-line pl-8"><span class="text-blue-400">cout</span> &lt;&lt; (N * M - <span class="text-yellow-300">1</span>) / <span class="text-yellow-300">2</span> &lt;&lt; <span class="text-blue-400">endl</span>;</div>
+                            <div id="code-line-9" class="code-line">}</div>
+                            
+                            <div class="text-slate-500 mt-2">}</div>
+                        </div>
+                        
+                        <!-- Explanation Box -->
+                        <div class="bg-slate-100 p-4 border-t border-slate-300 flex-1 flex flex-col justify-center">
+                            <h4 class="font-bold text-primary mb-1 text-sm">الشرح:</h4>
+                            <p id="step-explanation" class="text-slate-800 font-bold leading-relaxed">
+                                اضغط على "الخطوة التالية" لبدء تشغيل الكود.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 5 -->
+            <section id="lesson-5" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الخامس: سر المحترفين (<span dir="ltr" class="inline-block">O(1)</span>)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">كيف نختصر كل هذا الكود الطويل في سطر واحد فقط؟</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="pro-tip p-6 rounded-xl shadow-sm">
+                        <h3 class="font-bold text-primary mb-3 text-xl">خدعة القسمة الصحيحة في C++ 🤯</h3>
+                        <p class="text-slate-700 leading-relaxed mb-4">
+                            في لغة C++، عندما نقسم رقماً فردياً صحيحاً <span dir="ltr" class="math-eq bg-slate-100 text-slate-600 border border-slate-200">(int)</span> على 2، فإن اللغة <strong>تحذف الكسر العشري تلقائياً</strong>.
+                            <br>مثال: المعادلة <span dir="ltr" class="math-eq bg-slate-100 text-slate-800 border border-slate-200">9 / 2</span> لن تعطي <span dir="ltr" class="math-eq bg-red-100 text-red-800 border border-red-200">4.5</span> بل ستعطيك <strong><span dir="ltr" class="math-eq bg-emerald-100 text-emerald-800 border border-emerald-200">4</span></strong> مباشرة وبدون أي تقريب!
+                        </p>
+                        <p class="text-slate-700 leading-relaxed mb-4">
+                            هل لاحظت شيئاً؟ هذا يعني أننا لسنا بحاجة لطرح 1 في الحالة الثالثة أبداً! الكمبيوتر سيطرحه تلقائياً بتجاهل الكسر.
+                            وهذا يعني أن الحالات الثلاث يمكن دمجها في معادلة رياضية واحدة، وسطر كود واحد!
+                        </p>
+                        
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden border border-slate-800">
+                            <!-- Fixed Button ID -->
+                            <button onclick="openModal('exp-2')" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            
+                            <div id="exp-2" class="hidden">
+                                <ul class="list-disc list-inside space-y-4 text-slate-700 font-medium">
+                                    <li class="leading-relaxed">هذا هو كود المحترفين! اختصرنا الشروط الثلاثة لأن المعادلة <span dir="ltr" class="math-eq bg-slate-100 text-primary border border-slate-200">(N * M) / 2</span> تعطي الناتج الصحيح دائماً بفضل طبيعة القسمة الصحيحة في لغة C++.</li>
+                                    <li class="leading-relaxed">التعقيد الزمني هو <span dir="ltr" class="math-eq bg-emerald-100 text-emerald-800 border border-emerald-200">O(1)</span> لأنه ينفذ عملية حسابية واحدة فقط، بغض النظر عن حجم الرقعة حتى لو كانت مليار × مليار.</li>
+                                </ul>
+                            </div>
+
+<pre dir="ltr" class="text-left m-0 rounded-none"><code class="language-cpp">#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    int N, M;
+    cin &gt;&gt; N &gt;&gt; M;
+    
+    // سطر واحد فقط يحل كل الحالات!
+    cout &lt;&lt; (N * M) / 2 &lt;&lt; endl; 
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 6: The Domino Visualizer (NEW) -->
+            <section id="lesson-6" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس السادس: معمل الدومينو (المحاكاة البصرية)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">أدخل أبعاد الرقعة وشاهد كيف يقوم الكمبيوتر برص قطع الدومينو رياضياً!</p>
+                </header>
+
+                <div class="bg-white p-6 rounded-xl shadow-xl border border-slate-200">
+                    
+                    <!-- Controls -->
+                    <div class="flex flex-col md:flex-row gap-4 mb-6 items-end bg-slate-50 p-4 rounded-lg border border-slate-200">
+                        <div class="flex-1 w-full">
+                            <label class="block text-slate-700 font-bold mb-2 text-sm">عدد الصفوف (N)</label>
+                            <input type="number" id="sim-n" min="1" max="15" value="3" class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 font-mono text-center">
+                        </div>
+                        <div class="flex-1 w-full">
+                            <label class="block text-slate-700 font-bold mb-2 text-sm">عدد الأعمدة (M)</label>
+                            <input type="number" id="sim-m" min="1" max="15" value="3" class="w-full px-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-rose-500 font-mono text-center">
+                        </div>
+                        <div class="w-full md:w-auto">
+                            <button onclick="generateDominoes()" class="w-full md:w-auto px-8 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-md shadow-md transition-colors whitespace-nowrap">
+                                ارسم الرقعة 🎲
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Statistics Dashboard -->
+                    <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                        <div class="bg-slate-100 p-3 rounded-lg border border-slate-200">
+                            <p class="text-xs text-slate-500 font-bold uppercase">المساحة الكلية</p>
+                            <p id="stat-area" class="text-2xl font-mono font-black text-slate-800">-</p>
+                        </div>
+                        <div class="bg-rose-50 p-3 rounded-lg border border-rose-200 shadow-inner">
+                            <p class="text-xs text-rose-600 font-bold uppercase">قطع الدومينو</p>
+                            <p id="stat-dominoes" class="text-2xl font-mono font-black text-rose-700">-</p>
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded-lg border border-slate-700 shadow-inner">
+                            <p class="text-xs text-slate-300 font-bold uppercase">خانات فارغة</p>
+                            <p id="stat-empty" class="text-2xl font-mono font-black text-white">-</p>
+                        </div>
+                    </div>
+
+                    <!-- Visual Grid Container -->
+                    <div class="sim-grid-container w-full overflow-auto bg-slate-200 p-4 rounded-xl border border-slate-300 shadow-inner flex justify-center items-center min-h-[300px]">
+                        <div id="domino-grid" class="grid gap-1 relative" dir="ltr">
+                            <!-- Grid will be generated here by JS -->
+                            <p class="text-slate-400 font-bold">اضغط على "ارسم الرقعة" للبدء</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-12 pt-6 border-t border-slate-200">
+                <button id="prev-btn" onclick="navigate(-1)" class="px-6 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors hidden font-bold shadow-sm">
+                    &rarr; الدرس السابق
+                </button>
+                <div class="flex-1"></div> <!-- Spacer -->
+                <button id="next-btn" onclick="navigate(1)" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-rose-700 transition-colors font-bold shadow-md">
+                    الدرس التالي &larr;
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal for Code Explanation (Fixed Display Logic) -->
+    <div id="codeModal" class="fixed inset-0 bg-slate-900 bg-opacity-70 z-50 items-center justify-center hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-300" id="modalContentBlock">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <h3 class="text-xl font-bold text-primary flex items-center gap-2">
+                    <span class="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center font-black">!</span>
+                    شرح الكود البرمجي
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 text-4xl leading-none">&times;</button>
+            </div>
+            <!-- Modal Body Content -->
+            <div id="modalBody" class="mb-6 overflow-y-auto max-h-96 pr-2">
+                <!-- Dynamic Content Will Be Inserted Here -->
+            </div>
+            <button onclick="closeModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 rounded-lg transition-colors border border-slate-200">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript for Logic -->
+    <script>
+        // --- Sidebar Navigation Logic ---
+        let currentLesson = 1;
+        const totalLessons = 6;
+
+        function showLesson(lessonNumber) {
+            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`lesson-${lessonNumber}`).classList.add('active');
+            document.getElementById(`nav-${lessonNumber}`).classList.add('active');
+            
+            currentLesson = lessonNumber;
+            updateButtons();
+            document.getElementById('main-content').scrollTop = 0;
+            
+            if (window.innerWidth < 768 && document.getElementById('sidebar-nav').style.display === 'block') {
+                toggleSidebar();
+            }
+            
+            // Auto generate grid if going to lesson 6 for the first time
+            if(lessonNumber === 6 && document.getElementById('domino-grid').innerHTML.includes('اضغط')) {
+                generateDominoes();
+            }
+        }
+
+        function navigate(direction) {
+            const newLesson = currentLesson + direction;
+            if (newLesson >= 1 && newLesson <= totalLessons) {
+                showLesson(newLesson);
+            }
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            prevBtn.style.display = currentLesson === 1 ? 'none' : 'block';
+            
+            if (currentLesson === totalLessons) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'block';
+                nextBtn.innerHTML = currentLesson === totalLessons - 1 ? "المعمل البصري 🔬" : "الدرس التالي &larr;";
+            }
+        }
+
+        // --- Improved Modal Functions ---
+        function openModal(explanationId) {
+            // Find the hidden div by its ID instead of using DOM traversal which might break
+            const contentDiv = document.getElementById(explanationId);
+            if(!contentDiv) return;
+            
+            document.getElementById('modalBody').innerHTML = contentDiv.innerHTML;
+            
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            // Show modal and apply animations safely
+            modal.classList.remove('hidden');
+            modal.classList.add('flex'); // Ensure flex takes over
+            
+            // Trigger browser reflow
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            modalBox.classList.remove('scale-95');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            // Reverse animations
+            modal.classList.add('opacity-0');
+            modalBox.classList.add('scale-95');
+            
+            // Hide completely after transition finishes
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        // --- Interactive Stepper Logic (Lesson 4) ---
+        const stepsData = [
+            { lines: [1], out: "-", desc: "1️⃣ نبدأ باختبار الشرط الأول: هل N (وهو 3) رقم زوجي؟ (3 % 2 == 0؟). الإجابة: خطأ (False)." },
+            { lines: [4], out: "-", desc: "2️⃣ بما أن الشرط الأول فشل، ننتقل للشرط الثاني: هل M (وهو 3) رقم زوجي؟ (3 % 2 == 0؟). الإجابة: خطأ أيضاً." },
+            { lines: [7], out: "-", desc: "3️⃣ بما أن العددين ليسا زوجيين، ننتقل تلقائياً لكتلة (else) المخصصة للحالة الثالثة (كلاهما فردي)." },
+            { lines: [8], out: "4", desc: "4️⃣ ننفذ المعادلة: المساحة (3×3) = 9. نطرح 1 فتصبح 8. نقسم على 2 فتصبح 4 قطع دومينو. نقوم بالطباعة." }
+        ];
+
+        let currentStepIndex = -1;
+
+        function updateUI(step) {
+            document.getElementById('step-explanation').innerText = step.desc;
+            
+            const updateVar = (id, newVal) => {
+                const el = document.getElementById(id);
+                if (el.innerText != newVal) {
+                    el.innerText = newVal;
+                    el.classList.add('var-updated');
+                    setTimeout(() => el.classList.remove('var-updated'), 300);
+                }
+            };
+
+            updateVar('var-out', step.out);
+
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            step.lines.forEach(lineNum => {
+                const lineEl = document.getElementById(`code-line-${lineNum}`);
+                if (lineEl) lineEl.classList.add('active-line');
+            });
+        }
+
+        function nextStep() {
+            if (currentStepIndex < stepsData.length - 1) {
+                currentStepIndex++;
+                updateUI(stepsData[currentStepIndex]);
+            } else {
+                document.getElementById('step-explanation').innerHTML = "<span class='text-emerald-700 font-bold'>تم الانتهاء من التنفيذ! اضغط إعادة التشغيل للبدء من جديد.</span>";
+            }
+        }
+
+        function resetStepper() {
+            currentStepIndex = -1;
+            document.getElementById('var-out').innerText = "-";
+            document.getElementById('step-explanation').innerText = "اضغط على 'الخطوة التالية' لبدء تشغيل الكود وتتبع مسار الرقعة 3×3.";
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+        }
+
+        // --- Domino Visual Simulator Logic (Lesson 6) ---
+        function generateDominoes() {
+            const nInput = parseInt(document.getElementById('sim-n').value);
+            const mInput = parseInt(document.getElementById('sim-m').value);
+            const grid = document.getElementById('domino-grid');
+            
+            // Validation
+            let N = nInput; let M = mInput;
+            if (isNaN(N) || N < 1) N = 1;
+            if (isNaN(M) || M < 1) M = 1;
+            if (N > 15) N = 15; // Limit to prevent browser lag
+            if (M > 15) M = 15;
+            
+            document.getElementById('sim-n').value = N;
+            document.getElementById('sim-m').value = M;
+
+            // Setup CSS Grid structure
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${M}, 40px)`;
+            grid.style.gridTemplateRows = `repeat(${N}, 40px)`;
+            
+            // Draw empty background slots first
+            for(let r=1; r<=N; r++) {
+                for(let c=1; c<=M; c++) {
+                    let cell = document.createElement('div');
+                    cell.className = "bg-white border border-slate-300 border-dashed rounded-sm w-full h-full absolute inset-0 -z-10 opacity-50";
+                    
+                    let wrapper = document.createElement('div');
+                    wrapper.className = "relative w-full h-full";
+                    wrapper.style.gridRow = r;
+                    wrapper.style.gridColumn = c;
+                    wrapper.appendChild(cell);
+                    grid.appendChild(wrapper);
+                }
+            }
+
+            let dominoCount = 0;
+
+            // Helper to draw a single domino
+            const createDomino = (row, col, isVertical) => {
+                let d = document.createElement('div');
+                // The styling for the domino piece
+                d.className = "domino-cell bg-gradient-to-br from-rose-500 to-rose-700 border border-rose-900 rounded shadow-md relative flex items-center justify-center z-10";
+                
+                if (isVertical) {
+                    d.style.gridRow = `${row} / span 2`;
+                    d.style.gridColumn = `${col} / span 1`;
+                    // Visual split line
+                    let split = document.createElement('div');
+                    split.className = "absolute w-full h-px bg-rose-900/60 top-1/2 -translate-y-1/2";
+                    d.appendChild(split);
+                } else {
+                    d.style.gridRow = `${row} / span 1`;
+                    d.style.gridColumn = `${col} / span 2`;
+                    // Visual split line
+                    let split = document.createElement('div');
+                    split.className = "absolute h-full w-px bg-rose-900/60 left-1/2 -translate-x-1/2";
+                    d.appendChild(split);
+                }
+                
+                // Add tiny white dots for domino effect (optional aesthetic)
+                let dot1 = document.createElement('div'); dot1.className="w-1 h-1 bg-white/50 rounded-full absolute top-2 left-2";
+                let dot2 = document.createElement('div'); dot2.className="w-1 h-1 bg-white/50 rounded-full absolute bottom-2 right-2";
+                d.appendChild(dot1); d.appendChild(dot2);
+
+                grid.appendChild(d);
+                dominoCount++;
+            };
+
+            // Domino Placing Logic (Based strictly on the mathematical rules)
+            if (N % 2 === 0) {
+                // Case 1: Rows are even -> Fill vertically
+                for (let c = 1; c <= M; c++) {
+                    for (let r = 1; r <= N; r += 2) {
+                        createDomino(r, c, true); // true = vertical
+                    }
+                }
+            } else if (M % 2 === 0) {
+                // Case 2: Cols are even -> Fill horizontally
+                for (let r = 1; r <= N; r++) {
+                    for (let c = 1; c <= M; c += 2) {
+                        createDomino(r, c, false); // false = horizontal
+                    }
+                }
+            } else {
+                // Case 3: Both are odd
+                // Fill first N-1 rows vertically
+                for (let c = 1; c <= M; c++) {
+                    for (let r = 1; r <= N - 1; r += 2) {
+                        createDomino(r, c, true);
+                    }
+                }
+                // Fill the last row horizontally, leaving the last cell empty
+                for (let c = 1; c <= M - 1; c += 2) {
+                    createDomino(N, c, false);
+                }
+                
+                // Mark the empty cell clearly
+                let emptyCell = document.createElement('div');
+                emptyCell.className = "bg-slate-900 flex items-center justify-center text-rose-500 font-bold text-xl rounded z-20 shadow-inner border-2 border-slate-700";
+                emptyCell.style.gridRow = N;
+                emptyCell.style.gridColumn = M;
+                emptyCell.innerText = "X";
+                grid.appendChild(emptyCell);
+            }
+
+            // Update Dashboard Stats
+            document.getElementById('stat-area').innerText = N * M;
+            document.getElementById('stat-dominoes').innerText = dominoCount;
+            document.getElementById('stat-empty').innerText = (N % 2 !== 0 && M % 2 !== 0) ? "1" : "0";
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateButtons();
+        });
+    </script>
+</body>
+</html>
