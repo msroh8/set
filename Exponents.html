@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسألة الأسس (Exponents) | المدرب محمد مجممي</title>
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Tajawal for Arabic) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Mermaid.js for Flowcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#2563eb', // Blue 600
+                        secondary: '#0f172a', // Slate 900
+                        accent: '#0ea5e9', // Sky 500
+                    }
+                }
+            }
+        }
+        
+        // إيقاف الرسم التلقائي للمخطط وتفعيل الأمان لكي تعمل الأزرار (النقر)
+        mermaid.initialize({ startOnLoad: false, theme: 'default', fontFamily: 'Tajawal', securityLevel: 'loose' });
+    </script>
+
+    <style>
+        body { font-family: 'Tajawal', sans-serif; }
+        .lesson-content { display: none; animation: fadeIn 0.4s ease-in-out; }
+        .lesson-content.active { display: block; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .nav-item { transition: all 0.2s ease; border-right: 4px solid transparent; }
+        .nav-item.active { 
+            background-color: #eff6ff; 
+            border-right: 4px solid #2563eb; 
+            color: #1e3a8a; 
+            font-weight: bold;
+        }
+        .nav-item:hover:not(.active) { background-color: #f8fafc; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .pro-tip { background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 100%); border-right: 4px solid #2563eb; }
+        
+        /* Code Highlighting Styles (High Contrast) */
+        .code-line { transition: all 0.3s ease; padding: 0.25rem 0.5rem; margin: 0.1rem 0; border-radius: 0.25rem; border-left: 4px solid transparent; color: #e2e8f0; } 
+        .code-line.active-line { background-color: rgba(37, 99, 235, 0.3); border-left: 4px solid #38bdf8; font-weight: bold; color: #ffffff; } 
+        .var-box { transition: all 0.3s ease; }
+        .var-updated { transform: scale(1.1); background-color: #e0f2fe; color: #1e40af; border-color: #2563eb; }
+        
+        /* Mathematical Equations LTR Fix - STRICT ISOLATION & NO WRAP */
+        .math-eq { direction: ltr !important; unicode-bidi: isolate; display: inline-block; font-family: monospace; font-weight: bold; padding: 0.1rem 0.4rem; border-radius: 0.25rem; margin: 0 0.2rem; white-space: nowrap; }
+        .math-block { direction: ltr !important; unicode-bidi: isolate; display: block; font-family: monospace; font-weight: bold; padding: 1rem; border-radius: 0.5rem; text-align: left; }
+
+        /* Fix for Mermaid SVG sizing & Clickability */
+        .mermaid { display: flex; justify-content: center; width: 100%; overflow-x: auto; }
+        .mermaid svg { max-width: 100% !important; height: auto !important; min-height: 450px; font-family: 'Tajawal', sans-serif !important; }
+        .mermaid .node { cursor: pointer !important; transition: transform 0.2s ease; }
+        .mermaid .node:hover { filter: brightness(0.9); transform: scale(1.05); }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row h-screen bg-slate-50 text-slate-800 overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-full md:w-80 bg-white shadow-xl z-20 flex flex-col flex-shrink-0 md:h-screen">
+        <div class="p-6 bg-secondary text-white">
+            <h1 class="text-2xl font-black mb-2 tracking-wide text-transparent bg-clip-text bg-gradient-to-l from-blue-400 to-cyan-400">
+                مسائل برمجية
+            </h1>
+            <p class="text-slate-300 text-sm">الأسس (Modular Exponentiation)</p>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4" id="sidebar-nav">
+            <button onclick="showLesson(1)" id="nav-1" class="nav-item active w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>1. تحليل المسألة والقيود</span>
+                <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">المشكلة</span>
+            </button>
+            <button onclick="showLesson(2)" id="nav-2" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>2. حصد النقاط (Casework)</span>
+                <span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full">رياضيات</span>
+            </button>
+            <button onclick="showLesson(3)" id="nav-3" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>3. خوارزمية الرفع السريع</span>
+                <span class="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">الخوارزمية</span>
+            </button>
+            <button onclick="showLesson(4)" id="nav-4" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>4. المخطط الانسيابي</span>
+                <span class="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-bold shadow-sm">خريطة تفاعلية</span>
+            </button>
+            <button onclick="showLesson(5)" id="nav-5" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>5. تفكيك الكود الأساسي</span>
+                <span class="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded-full shadow-sm">شرح</span>
+            </button>
+            <button onclick="showLesson(6)" id="nav-6" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>6. المشغل التفاعلي (المحاكاة)</span>
+                <span class="text-xs bg-accent text-white px-2 py-1 rounded-full shadow-md animate-pulse">تتبع حي</span>
+            </button>
+            <button onclick="showLesson(7)" id="nav-7" class="nav-item w-full text-right px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <span>7. ماذا لو تغيرت القيود؟</span>
+                <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded-full font-bold shadow-sm">متقدم</span>
+            </button>
+        </nav>
+        
+        <!-- Footer / Signature -->
+        <div class="p-4 bg-slate-100 text-center border-t border-slate-200 mt-auto">
+            <p class="text-sm font-bold text-slate-600">إعداد وتصميم</p>
+            <p class="text-lg font-black text-primary mt-1">المدرب / محمد مجممي</p>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 h-full overflow-y-auto scroll-smooth relative" id="main-content">
+        
+        <div class="max-w-4xl mx-auto p-6 md:p-10 pb-32">
+            
+            <!-- Lesson 1 -->
+            <section id="lesson-1" class="lesson-content active">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الأول: تحليل مسألة الأسس (Exponents)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">قراءة المدخلات واستيعاب القيود التي تتطلب حلاً ذكياً.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">المطلوب في المسألة 🎯</h3>
+                        <p class="mb-4 leading-relaxed text-slate-700">
+                            يُعطى لك 3 أعداد صحيحة <span class="math-eq bg-slate-100 border border-slate-200 text-slate-800">A, B, M</span>. والمطلوب هو حساب باقي قسمة الأساس <span class="math-eq bg-slate-100 border border-slate-200 text-slate-800">A</span> مرفوعاً للقوة <span class="math-eq bg-slate-100 border border-slate-200 text-slate-800">B</span> على الرقم <span class="math-eq bg-slate-100 border border-slate-200 text-slate-800">M</span>. 
+                            رياضياً تُكتب المعادلة هكذا:
+                        </p>
+                        <div class="math-block bg-slate-50 text-slate-800 border border-slate-200 text-2xl text-center shadow-inner py-4">
+                            (A ^ B) % M
+                        </div>
+                        
+                        <div class="bg-blue-50 border border-blue-200 p-5 rounded-lg shadow-inner mt-6">
+                            <h4 class="font-bold text-blue-900 mb-3">الأمثلة التوضيحية (Examples):</h4>
+                            <ul class="text-sm text-blue-800 space-y-3">
+                                <li class="flex items-center gap-2">
+                                    <span class="math-eq bg-white border border-blue-300">2, 3, 10</span> &larr; <span class="math-eq bg-white border border-blue-300 font-black text-blue-900">(2 ^ 3) % 10 = 8 % 10 = 8</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="math-eq bg-white border border-blue-300">10, 3, 5</span> &larr; <span class="math-eq bg-white border border-blue-300 font-black text-blue-900">(10 ^ 3) % 5 = 1000 % 5 = 0</span>
+                                </li>
+                                <li class="flex items-center gap-2">
+                                    <span class="math-eq bg-white border border-blue-300">7, 100, 6</span> &larr; <span class="math-eq bg-white border border-blue-300 font-black text-blue-900">(7 ^ 100) % 6 = 1</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 p-6 rounded-xl shadow-sm">
+                        <h3 class="text-xl font-bold text-red-800 mb-4 flex items-center gap-2">
+                            <span>⚠️</span> قراءة القيود المرفقة (Constraints Analysis)
+                        </h3>
+                        <p class="text-sm text-red-900 leading-relaxed mb-4 font-medium">
+                            في المسابقات، القيود هي التي تحدد الخوارزمية. في هذه المسألة، الزمن المحدد هو <strong>1 ثانية</strong>، والقيود كما وردت بالمرفق تماماً:
+                        </p>
+                        <div class="math-block bg-white text-red-800 border border-red-300 text-center text-lg py-2 mb-4">
+                            0 &le; A, B &le; 10^6<br>
+                            1 &le; M &le; 10^9
+                        </div>
+                        
+                        <div class="space-y-4 border-t border-red-200 pt-4">
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">1. لماذا نحتاج لطريقة أسرع رغم أن الأس مليون فقط؟</h4>
+                                <p class="text-sm text-slate-700 leading-relaxed">
+                                    الأس <span class="math-eq bg-white border border-slate-200">B</span> يصل إلى <span class="math-eq bg-white border border-slate-200">10^6</span> (مليون). الكمبيوتر العادي ينفذ حوالي <span class="math-eq bg-white border border-slate-200">10^8</span> عملية في الثانية. لو استخدمنا حلقة <code>for</code> بسيطة للضرب، ستقوم بمليون خطوة. نظرياً هذا قد ينجح ويمر خلال ثانية واحدة لو كان هناك اختبار واحد فقط!<br><br>
+                                    <strong>لكن احذر:</strong> في المسابقات، نظام التحكيم يقوم بتشغيل كودك على آلاف الحالات الاختبارية (Multiple Test Cases) دفعة واحدة. لو كررنا المليون خطوة لكل اختبار، سيتراكم الوقت وسيرفض النظام حلك بنتيجة (Time Limit Exceeded). لذلك نستخدم خوارزمية ذكية تقلص المليون خطوة إلى <strong>20 خطوة فقط!</strong>
+                                </p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-red-800 mb-1">2. لماذا M &le; 10^9 تحديداً؟ (Data Types)</h4>
+                                <p class="text-sm text-slate-700 leading-relaxed">
+                                    أقصى قيمة يستوعبها المتغير <span class="math-eq bg-white border border-slate-200">long long</span> هي <span class="math-eq bg-white border border-slate-200">9 \times 10^{18}</span> تقريباً. 
+                                    أثناء الخوارزمية سنقوم بضرب <span class="math-eq bg-white border border-slate-200">(A % M) * (A % M)</span>.
+                                    وبما أن <span class="math-eq bg-white border border-slate-200">M \le 10^9</span>، فإن ناتج الضرب لن يتجاوز <span class="math-eq bg-white border border-slate-200">10^{18}</span>، مما يعني أنه سيظل آمناً داخل الـ <span class="math-eq bg-white border border-slate-200">long long</span> دون أن يتجاوز السعة وينفجر (Overflow). 
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 2 -->
+            <section id="lesson-2" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثاني: حصد النقاط بالرياضيات (Casework)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">في المسابقات، يمكنك الحصول على تقييم جزئي حتى لو لم تعرف الخوارزمية الكاملة!</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">العمل على الحالات (Subtasks) 🧩</h3>
+                        <p class="leading-relaxed mb-4 text-slate-700">
+                            في وصف المسألة، تم تقسيم التقييم إلى "مجموعات". إذا تمكنت من برمجة الشروط الرياضية البسيطة (Casework)، يمكنك حصد <strong>59 نقطة</strong> بأسطر <code>if</code> بسيطة جداً دون أي حلقات تكرار!
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <!-- Group 1 -->
+                            <div class="bg-slate-50 border-l-4 border-emerald-500 p-4 rounded shadow-sm">
+                                <h4 class="font-bold text-emerald-700 mb-1">المجموعة 1 (13 نقطة): <span class="math-eq bg-emerald-100 text-emerald-900 border border-emerald-300 font-normal">A &equiv; 0 (mod M)</span></h4>
+                                <p class="text-sm text-slate-700 leading-relaxed">
+                                    هذا الرمز الرياضي يعني برمجياً <span class="math-eq bg-white border border-slate-200">A % M == 0</span>. 
+                                    بمعنى أن A من مضاعفات M. وبالتالي، أي أس نرفعه له سيظل مضاعفاً، والناتج النهائي سيكون <strong>0</strong> دائماً.
+                                </p>
+                            </div>
+                            <!-- Group 2 -->
+                            <div class="bg-slate-50 border-l-4 border-blue-500 p-4 rounded shadow-sm">
+                                <h4 class="font-bold text-blue-700 mb-1">المجموعة 2 (11 نقطة): <span class="math-eq bg-blue-100 text-blue-900 border border-blue-300 font-normal">A &equiv; 1 (mod M)</span></h4>
+                                <p class="text-sm text-slate-700 leading-relaxed">
+                                    هذا يعني <span class="math-eq bg-white border border-slate-200">A % M == 1</span>. 
+                                    رياضياً <span class="math-eq bg-white border border-slate-200">1^B</span> يساوي 1 دائماً مهما كان حجم B. 
+                                    لذا الناتج سيكون <strong>1</strong> دائماً. (ينطبق على المثال <span class="math-eq bg-white border border-slate-200">7^{100} % 6</span> في المسألة).
+                                </p>
+                            </div>
+                            <!-- Group 3 -->
+                            <div class="bg-slate-50 border-l-4 border-purple-500 p-4 rounded shadow-sm">
+                                <h4 class="font-bold text-purple-700 mb-1">المجموعة 3 (35 نقطة): <span class="math-eq bg-purple-100 text-purple-900 border border-purple-300 font-normal">A &equiv; M - 1 (mod M)</span></h4>
+                                <p class="text-sm text-slate-700 leading-relaxed">
+                                    هذه حالة رياضية خادعة تكافئ رياضياً <span class="math-eq bg-white border border-slate-200">-1</span>. 
+                                    إذا كان الأس <span class="math-eq bg-white border border-slate-200">B</span> <strong>زوجياً</strong>، فإن <span class="math-eq bg-white border border-slate-200">(-1)^{\text{even}} = 1</span>.<br>
+                                    وإذا كان <span class="math-eq bg-white border border-slate-200">B</span> <strong>فردياً</strong>، فإن <span class="math-eq bg-white border border-slate-200">(-1)^{\text{odd}} = -1</span> (والذي يعادل برمجياً <span class="math-eq bg-white border border-slate-200">M - 1</span>).
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 3 -->
+            <section id="lesson-3" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الثالث: خوارزمية الرفع السريع (Binary Exponentiation)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">كيف نحصل على العلامة الكاملة للمجموعة 4 (41 نقطة) في وقت قياسي؟</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <h3 class="text-xl font-bold text-primary mb-3">سر تنصيف الأسس ⚡</h3>
+                        <p class="leading-relaxed mb-4 text-slate-700">
+                            بدلاً من أن نضرب الرقم <span class="math-eq bg-slate-100 text-slate-800 border border-slate-200">A</span> في نفسه <span class="math-eq bg-slate-100 text-slate-800 border border-slate-200">B</span> مرة، يمكننا استغلال خصائص الرياضيات لتحقيق قفزات ضخمة تعتمد على تمثيل الرقم في النظام الثنائي (Binary):
+                        </p>
+                        
+                        <div class="bg-blue-50 p-5 rounded-lg border border-blue-200">
+                            <ul class="list-disc list-inside space-y-4 text-blue-900 font-medium">
+                                <li class="leading-relaxed border-b border-blue-200 pb-3">
+                                    إذا كان الأس <strong>زوجياً</strong>: يمكننا تربيع الأساس وقسمة الأس على 2.<br>
+                                    مثال: <span class="math-eq bg-white border border-blue-300 text-sm">3^{10} = (3^2)^5 = 9^5</span> (اختصرنا 5 عمليات ضرب في خطوة واحدة!).
+                                </li>
+                                <li class="leading-relaxed pt-1">
+                                    إذا كان الأس <strong>فردياً</strong>: نسحب نسخة واحدة من الأساس ونخزنها في النتيجة، ليصبح الأس المتبقي زوجياً.<br>
+                                    مثال: <span class="math-eq bg-white border border-blue-300 text-sm">9^5 = 9 \times 9^4</span>. ثم نكرر قاعدة التنصيف على <span class="math-eq bg-white border border-blue-300 text-sm">9^4</span>!
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="mt-6 p-4 border border-slate-200 bg-slate-50 rounded">
+                            <p class="text-slate-700 font-bold mb-2 flex items-center gap-2"><span>🛡️</span> الدرع الواقي من الـ Overflow:</p>
+                            <p class="text-sm text-slate-600">
+                                نقوم بتطبيق عملية المعيار <span class="math-eq bg-white border border-slate-300">% M</span> <strong>بعد كل عملية ضرب أو تربيع</strong> مباشرة. هذه الخطوة تضمن بقاء الأرقام صغيرة وآمنة داخل الذاكرة في كل خطوة.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 4: Interactive Flowchart -->
+            <section id="lesson-4" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الرابع: المخطط الانسيابي التفاعلي</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">خريطة بصرية لتتبع مسار البيانات. <strong>انقر على أي شكل في المخطط لترى شرحاً مفصلاً مع مثال حي!</strong></p>
+                </header>
+
+                <div class="flex flex-col lg:flex-row gap-6 items-start">
+                    
+                    <!-- Diagram Container -->
+                    <div class="w-full lg:w-3/5 bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col items-center">
+                        <div class="mermaid w-full" dir="ltr">
+                            graph TD
+                                Start([تهيئة المتغيرات]) --> Cond{"هل (exp > 0) ؟"}
+                                Cond -- "لا (انتهينا)" --> End([طباعة النتيجة res])
+                                Cond -- "نعم (مستمر)" --> IsOdd{"هل (exp % 2 == 1) ؟"}
+                                
+                                IsOdd -- "نعم (فردي)" --> Multiply["الضرب: res = (res * base) % M"]
+                                IsOdd -- "لا (زوجي)" --> Square["التربيع: base = (base * base) % M<br>exp = exp / 2"]
+                                
+                                Multiply --> Square
+                                Square --> Cond
+                                
+                                %% Click Events
+                                click Start "javascript:showFlowExp('Start')" "انقر لمعرفة التفاصيل والمثال"
+                                click Cond "javascript:showFlowExp('Cond')" "انقر لمعرفة التفاصيل والمثال"
+                                click IsOdd "javascript:showFlowExp('IsOdd')" "انقر لمعرفة التفاصيل والمثال"
+                                click Multiply "javascript:showFlowExp('Multiply')" "انقر لمعرفة التفاصيل والمثال"
+                                click Square "javascript:showFlowExp('Square')" "انقر لمعرفة التفاصيل والمثال"
+                                click End "javascript:showFlowExp('End')" "انقر لمعرفة التفاصيل والمثال"
+
+                                %% Styling
+                                classDef default fill:#eff6ff,stroke:#2563eb,stroke-width:2px,color:#1e3a8a,font-weight:bold;
+                                classDef condition fill:#e0f2fe,stroke:#0ea5e9,stroke-width:2px,color:#0f172a,font-weight:bold;
+                                classDef finish fill:#dcfce7,stroke:#059669,stroke-width:2px,color:#064e3b,font-weight:bold;
+                                classDef action fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f,font-weight:bold;
+                                
+                                class Cond,IsOdd condition;
+                                class End,Start finish;
+                                class Multiply,Square action;
+                        </div>
+                    </div>
+
+                    <!-- Explanation Panel -->
+                    <div class="w-full lg:w-2/5 bg-slate-800 text-white p-6 rounded-xl shadow-lg border border-slate-700 min-h-[400px] flex flex-col transition-all">
+                        <h3 class="text-xl font-bold text-cyan-400 mb-4 border-b border-slate-600 pb-2 flex items-center gap-2">
+                            <span>💡</span> تفاصيل الخطوة والمثال
+                        </h3>
+                        <div id="flow-explanation" class="text-slate-300 leading-relaxed text-sm flex-1">
+                            <p class="text-center mt-10 text-slate-400 text-lg animate-pulse">انقر على أي شكل في المخطط لقراءة الشرح وتتبع مثال <span dir="ltr" class="math-eq bg-slate-700 text-white">(3 ^ 5) % 10</span>.</p>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-slate-600 text-xs text-slate-500 text-center">
+                            المخطط الانسيابي التفاعلي (Interactive Flowchart)
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Lesson 5 -->
+            <section id="lesson-5" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس الخامس: تفكيك الكود الأساسي</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">ترجمة المنطق الرياضي والمخطط الانسيابي إلى كود C++ نظيف واحترافي.</p>
+                </header>
+
+                <div class="space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                        <p class="leading-relaxed mb-4 text-slate-700">
+                            اضغط على علامة التعجب <span class="bg-amber-100 text-amber-600 w-6 h-6 inline-flex items-center justify-center rounded-full font-black text-sm mx-1">!</span> بجوار الكود لتفهم وظيفة كل كتلة برمجية في خوارزمية الرفع السريع.
+                        </p>
+
+                        <!-- Code Block with Popover -->
+                        <div class="relative group my-4 shadow-sm rounded-xl overflow-hidden border border-slate-800">
+                            <!-- Fixed Button ID -->
+                            <button onclick="openModal('exp-1')" title="شرح الكود" class="absolute top-3 right-3 bg-accent text-white rounded-full w-8 h-8 flex items-center justify-center font-black shadow-md hover:bg-amber-600 transition-transform transform hover:scale-110 z-10 cursor-pointer">!</button>
+                            
+                            <!-- Hidden explanation content -->
+                            <div id="exp-1" class="hidden">
+                                <ul class="list-disc list-inside space-y-4 text-slate-700 font-medium text-sm">
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-primary border border-slate-200">long long res = 1;</span><br> متغير النتيجة التراكمية، يبدأ بـ 1 لأن العنصر المحايد في عملية الضرب هو 1.</li>
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-blue-600 border border-slate-200">long long base = A % M;</span><br> خطوة أمان مبكرة جداً: أخذ باقي قسمة الأساس <span dir="ltr" class="math-eq bg-white border border-slate-200">A</span> تحسباً لأن يكون <span dir="ltr" class="math-eq bg-white border border-slate-200">A</span> أكبر بكثير من <span dir="ltr" class="math-eq bg-white border border-slate-200">M</span>.</li>
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-purple-600 border border-slate-200">while (exp &gt; 0)</span><br> الحلقة تستمر طالما أن الأس أكبر من الصفر. سيتقلص الأس للنصف بسرعة هائلة في كل دورة.</li>
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-emerald-600 border border-slate-200">if (exp % 2 == 1)</span><br> إذا كان الأس فردياً، نقوم بضرب الأساس في متغير النتيجة <span dir="ltr" class="math-eq bg-white border border-slate-200">res</span>، ولا ننسى تطبيق <span dir="ltr" class="math-eq bg-white border border-slate-200">% M</span> لمنع تجاوز السعة.</li>
+                                    <li class="leading-relaxed"><span dir="ltr" class="math-eq bg-slate-100 text-rose-600 border border-slate-200">base = (base * base) % M;</span><br> نربع الأساس تحضيراً للمرحلة القادمة، ثم نقسم الأس على 2 <span dir="ltr" class="math-eq bg-white border border-slate-200">(exp /= 2)</span>.</li>
+                                </ul>
+                            </div>
+
+<pre dir="ltr" class="text-left m-0 rounded-none"><code class="language-cpp">#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    long long A, B, M;
+    cin &gt;&gt; A &gt;&gt; B &gt;&gt; M;
+
+    // تجهيز المتغيرات
+    long long res = 1;
+    long long base = A % M;
+    long long exp = B;
+
+    // خوارزمية الرفع السريع
+    while (exp &gt; 0) {
+        // إذا كان الأس فردياً، اسحب نسخة للنتيجة
+        if (exp % 2 == 1) {
+            res = (res * base) % M;
+        }
+        
+        // ربّع الأساس واقسم الأس على 2
+        base = (base * base) % M;
+        exp /= 2;
+    }
+
+    cout &lt;&lt; res &lt;&lt; "\n";
+    return 0;
+}</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 6 -->
+            <section id="lesson-6" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس السادس: المشغل التفاعلي الخارق</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">أدخل أي أرقام ضخمة وسيحسبها المتصفح بسرعة الضوء، وراقب "جدول التتبع" لترى كيف تتغير القيم بوضوح.</p>
+                </header>
+
+                <!-- Interactive Code Stepper -->
+                <div class="bg-secondary rounded-xl shadow-2xl overflow-hidden flex flex-col lg:flex-row border border-slate-700 mb-8">
+                    
+                    <!-- Left Side: Variables & Controls (RTL) -->
+                    <div class="w-full lg:w-1/3 bg-slate-800 p-6 flex flex-col border-b lg:border-b-0 lg:border-l border-slate-700">
+                        <h3 class="text-white font-bold text-lg mb-4 border-b border-slate-600 pb-2">شاشة المراقبة</h3>
+                        
+                        <!-- Inputs -->
+                        <div class="mb-4 flex flex-col md:flex-row gap-2 text-center" dir="ltr">
+                            <div class="flex-1 bg-slate-700 rounded p-2 border border-slate-600 shadow-inner">
+                                <label for="input-a" class="text-slate-400 text-xs block font-bold mb-1">A (الأساس)</label>
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" id="input-a" class="w-full bg-slate-800 text-white font-mono text-lg font-bold text-center border border-slate-600 rounded focus:border-blue-500 focus:outline-none py-1" value="3">
+                            </div>
+                            <div class="flex-1 bg-slate-700 rounded p-2 border border-slate-600 shadow-inner">
+                                <label for="input-b" class="text-slate-400 text-xs block font-bold mb-1">B (الأس)</label>
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" id="input-b" class="w-full bg-slate-800 text-white font-mono text-lg font-bold text-center border border-slate-600 rounded focus:border-blue-500 focus:outline-none py-1" value="5">
+                            </div>
+                            <div class="flex-1 bg-slate-700 rounded p-2 border border-slate-600 shadow-inner">
+                                <label for="input-m" class="text-slate-400 text-xs block font-bold mb-1">M (المعيار)</label>
+                                <input type="text" inputmode="numeric" pattern="[0-9]*" id="input-m" class="w-full bg-slate-800 text-white font-mono text-lg font-bold text-center border border-slate-600 rounded focus:border-blue-500 focus:outline-none py-1" value="10">
+                            </div>
+                        </div>
+
+                        <!-- Variables -->
+                        <div class="space-y-4 mb-6 flex-1">
+                            <div class="flex gap-4">
+                                <div class="flex-1">
+                                    <span class="text-slate-400 text-xs block mb-1 text-center">الأس (exp)</span>
+                                    <div id="var-exp" class="var-box bg-slate-700 text-white font-mono text-lg px-2 py-2 rounded-lg border border-slate-600 font-bold text-center break-all" dir="ltr">-</div>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="text-slate-400 text-xs block mb-1 text-center">الأساس (base)</span>
+                                    <div id="var-base" class="var-box bg-slate-700 text-accent font-mono text-lg px-2 py-2 rounded-lg border border-slate-600 font-bold text-center break-all" dir="ltr">-</div>
+                                </div>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 text-xs block mb-1 text-center">النتيجة التراكمية (res)</span>
+                                <div id="var-res" class="var-box bg-slate-900 text-emerald-400 font-mono text-xl px-4 py-3 rounded-lg border border-emerald-900 font-bold text-center shadow-inner break-all" dir="ltr">-</div>
+                            </div>
+                        </div>
+
+                        <!-- Controls -->
+                        <div class="space-y-3 mt-4">
+                            <button onclick="startCustomScenario()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg transition-colors text-sm shadow-md">
+                                بدء المحاكاة بالأرقام المدخلة 🚀
+                            </button>
+                            <button onclick="nextStep()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-colors shadow-lg transform active:scale-95 flex justify-center items-center gap-2">
+                                <span>الخطوة التالية</span>
+                                <span>&darr;</span>
+                            </button>
+                            <button onclick="initDynamicScenario()" class="w-full bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 rounded-lg transition-colors text-sm border-2 border-slate-400 border-dashed">
+                                توليد مسألة عشوائية 🎲
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: The Code & Explanation (LTR Code) -->
+                    <div class="w-full lg:w-2/3 flex flex-col">
+                        <!-- C++ Code Block -->
+                        <div class="p-6 bg-[#1e1e1e] text-slate-200 font-mono text-sm leading-relaxed overflow-x-auto" dir="ltr">
+                            <div class="text-slate-500 mb-2">int main() {<br>&nbsp;&nbsp;&nbsp;&nbsp;long long A, B, M;<br>&nbsp;&nbsp;&nbsp;&nbsp;cin &gt;&gt; A &gt;&gt; B &gt;&gt; M;</div>
+                            
+                            <div id="code-line-8" class="code-line pl-4"><span class="text-blue-400">long long</span> res = <span class="text-yellow-300">1</span>;</div>
+                            <div id="code-line-9" class="code-line pl-4"><span class="text-blue-400">long long</span> base = A % M;</div>
+                            <div id="code-line-10" class="code-line pl-4"><span class="text-blue-400">long long</span> exp = B;</div>
+                            <div id="code-line-11" class="code-line pl-4"></div>
+                            <div id="code-line-12" class="code-line pl-4"><span class="text-purple-400">while</span> (exp &gt; <span class="text-yellow-300">0</span>) {</div>
+                            <div id="code-line-13" class="code-line pl-8"><span class="text-purple-400">if</span> (exp % <span class="text-yellow-300">2</span> == <span class="text-yellow-300">1</span>) {</div>
+                            <div id="code-line-14" class="code-line pl-12">res = (res * base) % M;</div>
+                            <div id="code-line-15" class="code-line pl-8">}</div>
+                            <div id="code-line-16" class="code-line pl-8">base = (base * base) % M;</div>
+                            <div id="code-line-17" class="code-line pl-8">exp /= <span class="text-yellow-300">2</span>;</div>
+                            <div id="code-line-18" class="code-line pl-4">}</div>
+                            <div id="code-line-19" class="code-line pl-4"></div>
+                            <div id="code-line-20" class="code-line pl-4"><span class="text-blue-400">cout</span> &lt;&lt; res &lt;&lt; <span class="text-yellow-300">"\\n"</span>;</div>
+                            
+                            <div class="text-slate-500 mt-2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-purple-400">return</span> <span class="text-yellow-300">0</span>;<br>}</div>
+                        </div>
+                        
+                        <!-- Explanation Box -->
+                        <div class="bg-slate-100 p-4 border-t border-slate-300 flex-1 flex flex-col justify-center min-h-[120px]">
+                            <h4 class="font-bold text-primary mb-2 text-sm">الشرح الحي:</h4>
+                            <div id="step-explanation" class="text-slate-800 leading-relaxed text-sm">
+                                اكتب أرقامك في المربعات أعلاه ثم اضغط على زر "بدء المحاكاة" للتتبع!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trace Table (Mental Tracking) -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
+                    <h3 class="text-xl font-bold text-primary mb-4 flex items-center gap-2">
+                        <span>📊</span> جدول التتبع الذهني (Trace Table)
+                    </h3>
+                    <p class="text-sm text-slate-600 mb-4">هذا الجدول يوضح كيف تتغير الذاكرة خطوة بخطوة. لاحظ أن الأرقام معزولة تماماً للحفاظ على اتجاهها الصحيح.</p>
+                    
+                    <div id="tracking-table-container" class="overflow-x-auto overflow-y-auto max-h-64 border border-slate-200 rounded-lg rounded-b-none scroll-smooth">
+                        <table class="w-full text-right border-collapse text-sm">
+                            <thead class="sticky top-0 z-10">
+                                <tr class="bg-slate-100 text-slate-700 shadow-sm">
+                                    <th class="p-3 border-b border-slate-300 text-center whitespace-nowrap">الخطوة</th>
+                                    <th class="p-3 border-b border-slate-300 text-center whitespace-nowrap font-mono" dir="ltr">exp</th>
+                                    <th class="p-3 border-b border-slate-300 text-center whitespace-nowrap font-mono" dir="ltr">base</th>
+                                    <th class="p-3 border-b border-slate-300 text-center whitespace-nowrap font-mono text-emerald-600" dir="ltr">res</th>
+                                    <th class="p-3 border-b border-slate-300 text-center whitespace-nowrap font-bold text-rose-600">طباعة (Output)</th>
+                                    <th class="p-3 border-b border-slate-300 text-right w-full min-w-[300px]">الحدث / التفسير البرمجي</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tracking-table-body" class="text-slate-700">
+                                <!-- Rows injected by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Empty state or visual cue -->
+                    <div id="table-empty-state" class="text-center py-4 bg-slate-50 border border-t-0 border-slate-200 rounded-b-lg text-slate-400 text-sm">
+                        اضغط على "الخطوة التالية" لبدء تسجيل البيانات هنا...
+                    </div>
+                </div>
+
+                <div class="mt-8 bg-emerald-50 border border-emerald-200 p-6 rounded-xl text-center shadow-sm">
+                    <p class="text-emerald-900 font-bold mb-2">سر التعقيد الزمني (Time Complexity)</p>
+                    <p class="text-emerald-800 text-sm leading-relaxed">
+                        بما أن الأس <span dir="ltr" class="math-eq bg-white border border-emerald-200">exp</span> ينقسم على 2 في كل دورة، فإن عدد الدورات يعادل عدد خانات الرقم بالنظام الثنائي (Binary representation). أي أن التعقيد هو <span dir="ltr" class="math-eq bg-emerald-600 text-white shadow">O(\log B)</span>. 
+                        حتى لو كان الأس <span dir="ltr" class="math-eq bg-white border border-emerald-200">10^6</span> (مليون)، فإن الحلقة ستدور <strong>20 مرة كحد أقصى فقط</strong> لتنجز ما يحتاج لمليون خطوة بالطريقة العادية!
+                    </p>
+                </div>
+            </section>
+
+            <!-- Lesson 7: Expected Constraints -->
+            <section id="lesson-7" class="lesson-content">
+                <header class="mb-8">
+                    <h2 class="text-3xl md:text-4xl font-black text-secondary mb-4">الدرس السابع: ماذا لو تغيرت القيود؟ (متقدم)</h2>
+                    <p class="text-lg text-slate-600 leading-relaxed">في المسابقات المتقدمة (مثل Codeforces Div.2/Div.1)، قد يرفع واضع المسألة القيود لكسر خوارزميتك المعتادة. إليك كيف تتصرف كالمحترفين!</p>
+                </header>
+
+                <div class="space-y-6">
+                    
+                    <!-- Constraint Scenario 1 -->
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-red-500">
+                        <h3 class="text-xl font-bold text-red-600 mb-3 flex items-center gap-2">
+                            <span>🔥</span> ماذا لو كان الأس <span dir="ltr" class="math-eq bg-red-50 border border-red-200 text-red-800">10^{18}</span> بدلاً من مليون؟
+                        </h3>
+                        <p class="text-slate-700 leading-relaxed mb-3">
+                            <strong>لماذا حلقة الـ for مستحيلة هنا؟</strong> 
+                            إذا كان الأس <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">10^{18}</span>، فإن الدوران بالطريقة العادية (1، 2، 3...) سيحتاج إلى <strong>31 سنة</strong> لينهي البرنامج! 
+                            هنا تصبح خوارزمية <strong>الرفع السريع (Binary Exponentiation)</strong> الملاذ الوحيد الممكن. لأنها ستحل الأس <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">10^{18}</span> في <strong>60 خطوة فقط!</strong>
+                        </p>
+                    </div>
+                    
+                    <!-- Constraint Scenario 2 -->
+                    <div class="bg-slate-50 p-6 rounded-xl shadow-sm border-t-4 border-blue-500">
+                        <h3 class="text-xl font-bold text-blue-600 mb-3 flex items-center gap-2">
+                            <span>🔥</span> ماذا لو كان <span dir="ltr" class="math-eq bg-blue-100 border border-blue-200 text-blue-800">M \le 10^{18}</span> أيضاً؟
+                        </h3>
+                        <p class="text-slate-700 leading-relaxed mb-3">
+                            <strong>لماذا يفشل كودنا الحالي؟</strong> 
+                            في كودنا، نقوم بتربيع الأساس: <span dir="ltr" class="math-eq bg-white border border-slate-200">(base * base) % M</span>. 
+                            إذا كانت قيمة <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">M</span> قريبة من <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">10^{18}</span>، فإن المتغير <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">base</span> قد يصل إلى <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">10^{18}</span>. 
+                            عندما نضربه في نفسه، سيصبح الناتج <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">10^{36}</span>! وهذا الرقم أضخم بكثير من سعة <span dir="ltr" class="math-eq bg-white border border-slate-200">long long</span> (التي تتسع لـ <span dir="ltr" class="math-eq bg-white border border-slate-200 font-normal">9 \times 10^{18}</span> كحد أقصى)، مما يسبب <strong>Integer Overflow</strong> وأرقاماً سالبة عشوائية.
+                        </p>
+                        <div class="bg-white border border-slate-200 p-4 rounded-lg">
+                            <h4 class="font-bold text-slate-800 mb-2">الحل (The Fix):</h4>
+                            <p class="text-sm text-slate-700 mb-3">استخدام نوع البيانات الخاص في مترجمات C++ (GCC) المسمى <span dir="ltr" class="math-eq bg-slate-100 border border-slate-300">__int128</span> للعمليات الوسيطة، وهو يتسع لأرقام فلكية تصل لـ <span dir="ltr" class="math-eq bg-slate-100 border border-slate-300">10^{38}</span>.</p>
+                            <pre dir="ltr" class="text-left m-0 rounded-none"><code class="language-cpp">base = (long long)((__int128)base * base % M);
+res = (long long)((__int128)res * base % M);</code></pre>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Navigation Buttons -->
+            <div class="flex justify-between items-center mt-12 pt-6 border-t border-slate-200">
+                <button id="prev-btn" onclick="navigate(-1)" class="px-6 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors hidden font-bold shadow-sm">
+                    &rarr; الدرس السابق
+                </button>
+                <div class="flex-1"></div> <!-- Spacer -->
+                <button id="next-btn" onclick="navigate(1)" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors font-bold shadow-md">
+                    الدرس التالي &larr;
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal for Code Explanation -->
+    <div id="codeModal" class="fixed inset-0 bg-slate-900 bg-opacity-70 z-50 items-center justify-center hidden opacity-0 transition-opacity duration-300 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-lg w-full mx-4 transform scale-95 transition-transform duration-300" id="modalContentBlock">
+            <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-3">
+                <h3 class="text-xl font-bold text-primary flex items-center gap-2">
+                    <span class="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center font-black">!</span>
+                    شرح الكود البرمجي
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-red-500 text-4xl leading-none">&times;</button>
+            </div>
+            <!-- Modal Body Content -->
+            <div id="modalBody" class="mb-6 overflow-y-auto max-h-96 pr-2">
+                <!-- Dynamic Content Will Be Inserted Here -->
+            </div>
+            <button onclick="closeModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 rounded-lg transition-colors border border-slate-200">
+                إغلاق النافذة
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript for Logic and Dynamic Random Simulation -->
+    <script>
+        // --- Sidebar Navigation Logic ---
+        let currentLesson = 1;
+        const totalLessons = 7;
+        let mermaidRendered = false; 
+
+        function showLesson(lessonNumber) {
+            document.querySelectorAll('.lesson-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`lesson-${lessonNumber}`).classList.add('active');
+            document.getElementById(`nav-${lessonNumber}`).classList.add('active');
+            
+            currentLesson = lessonNumber;
+            updateButtons();
+            document.getElementById('main-content').scrollTop = 0;
+            
+            if (window.innerWidth < 768 && document.getElementById('sidebar-nav').style.display === 'block') {
+                toggleSidebar();
+            }
+
+            // Lazy Render Mermaid.js
+            if (lessonNumber === 4 && !mermaidRendered) {
+                setTimeout(() => {
+                    mermaid.init(undefined, document.querySelectorAll('.mermaid'));
+                    mermaidRendered = true;
+                }, 100);
+            }
+        }
+
+        function navigate(direction) {
+            const newLesson = currentLesson + direction;
+            if (newLesson >= 1 && newLesson <= totalLessons) {
+                showLesson(newLesson);
+            }
+        }
+
+        function updateButtons() {
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+
+            prevBtn.style.display = currentLesson === 1 ? 'none' : 'block';
+            
+            if (currentLesson === totalLessons) {
+                nextBtn.style.display = 'none';
+            } else {
+                nextBtn.style.display = 'block';
+                nextBtn.innerHTML = currentLesson === totalLessons - 1 ? "ماذا لو تغيرت القيود؟ ⚠️" : "الدرس التالي &larr;";
+            }
+        }
+
+        // --- Improved Modal Functions ---
+        function openModal(explanationId) {
+            const contentDiv = document.getElementById(explanationId);
+            if(!contentDiv) return;
+            
+            document.getElementById('modalBody').innerHTML = contentDiv.innerHTML;
+            
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            
+            void modal.offsetWidth;
+            
+            modal.classList.remove('opacity-0');
+            modalBox.classList.remove('scale-95');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('codeModal');
+            const modalBox = document.getElementById('modalContentBlock');
+            
+            modal.classList.add('opacity-0');
+            modalBox.classList.add('scale-95');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        // --- Interactive Flowchart Logic (Lesson 4) ---
+        const flowExplanations = {
+            'Start': `
+                <h4 class="font-bold text-cyan-400 mb-2">تهيئة المتغيرات (البداية)</h4>
+                <p class="mb-3 text-slate-200">نبدأ بإعداد المتغيرات الأساسية لدخول الحلقة:</p>
+                <ul class="list-disc list-inside space-y-1 mb-4 text-slate-300">
+                    <li><span dir="ltr" class="math-eq bg-slate-700">res = 1</span>: النتيجة تبدأ بـ 1.</li>
+                    <li><span dir="ltr" class="math-eq bg-slate-700">base = A % M</span>: نحمي الأساس من تجاوز السعة.</li>
+                    <li><span dir="ltr" class="math-eq bg-slate-700">exp = B</span>: الأس الأصلي.</li>
+                </ul>
+                <div class="bg-slate-700 border border-slate-600 p-3 rounded">
+                    <p class="text-xs text-slate-400 mb-1">مثال: لحساب <span dir="ltr" class="math-eq">(3 ^ 5) % 10</span></p>
+                    <p class="font-mono text-emerald-400 text-sm" dir="ltr">res=1, base=3, exp=5</p>
+                </div>
+            `,
+            'Cond': `
+                <h4 class="font-bold text-cyan-400 mb-2">شرط الاستمرار (While Loop)</h4>
+                <p class="mb-3 text-slate-200">نسأل البرنامج: هل لا يزال هناك "أس" لنعمل عليه؟</p>
+                <ul class="list-disc list-inside space-y-1 mb-4 text-slate-300">
+                    <li>إذا كان <span dir="ltr" class="math-eq bg-slate-700">exp &gt; 0</span>، ندخل الدورة.</li>
+                    <li>إذا كان <span dir="ltr" class="math-eq bg-slate-700">exp == 0</span>، تنتهي الحلقة.</li>
+                </ul>
+                <div class="bg-slate-700 border border-slate-600 p-3 rounded">
+                    <p class="text-xs text-slate-400 mb-1">بناءً على مثالنا السابق:</p>
+                    <p class="font-mono text-emerald-400 text-sm" dir="ltr">exp=5 &rarr; 5 &gt; 0 (True). ندخل الحلقة.</p>
+                </div>
+            `,
+            'IsOdd': `
+                <h4 class="font-bold text-cyan-400 mb-2">فحص نوع الأس (زوجي أم فردي)</h4>
+                <p class="mb-3 text-slate-200">أهم قرار في الخوارزمية! يتم تحديد ما إذا كنا سنسحب نسخة للنتيجة أم لا.</p>
+                <div class="bg-slate-700 border border-slate-600 p-3 rounded">
+                    <p class="text-xs text-slate-400 mb-1">في دورتنا الحالية:</p>
+                    <p class="font-mono text-emerald-400 text-sm" dir="ltr">exp=5 &rarr; 5 % 2 == 1 (True).</p>
+                    <p class="text-xs text-slate-300 mt-2">بما أن 5 فردي، سيتجه المسار إلى مربع "الضرب".</p>
+                </div>
+            `,
+            'Multiply': `
+                <h4 class="font-bold text-cyan-400 mb-2">سحب نسخة (عملية الضرب)</h4>
+                <p class="mb-3 text-slate-200">بما أن الأس فردي، نضرب الأساس الحالي في النتيجة التراكمية، ولا ننسى المعيار <span dir="ltr" class="math-eq bg-slate-700">% M</span> للحماية.</p>
+                <div class="bg-slate-700 border border-slate-600 p-3 rounded">
+                    <p class="text-xs text-slate-400 mb-1">تطبيق على المثال:</p>
+                    <p class="font-mono text-emerald-400 text-sm" dir="ltr">res = (1 * 3) % 10 = 3</p>
+                    <p class="text-xs text-slate-300 mt-2">النتيجة <span dir="ltr" class="math-eq">res</span> أصبحت الآن 3.</p>
+                </div>
+            `,
+            'Square': `
+                <h4 class="font-bold text-cyan-400 mb-2">القفزة المزدوجة (تربيع وتنصيف)</h4>
+                <p class="mb-3 text-slate-200">هذه الخطوة الثابتة هي سر السرعة <span dir="ltr" class="math-eq bg-slate-700 text-emerald-400 font-normal">O(\log B)</span>! نضاعف الأساس ونقسم الأس على 2.</p>
+                <div class="bg-slate-700 border border-slate-600 p-3 rounded">
+                    <p class="text-xs text-slate-400 mb-1">العمليات على مثالنا:</p>
+                    <p class="font-mono text-emerald-400 text-sm" dir="ltr">base = (3 * 3) % 10 = 9</p>
+                    <p class="font-mono text-accent text-sm" dir="ltr">exp = 5 / 2 = 2</p>
+                    <p class="text-xs text-slate-300 mt-2">الأساس أصبح 9، والأس أصبح 2. نعود لشرط الاستمرار!</p>
+                </div>
+            `,
+            'End': `
+                <h4 class="font-bold text-cyan-400 mb-2">النهاية (طباعة النتيجة)</h4>
+                <p class="mb-3 text-slate-200">عندما يصل الأس إلى 0، تكون النتيجة التراكمية قد احتفظت بالحل الصحيح والآمن.</p>
+                <div class="bg-slate-700 border border-slate-600 p-3 rounded">
+                    <p class="text-xs text-slate-400 mb-1">النتيجة النهائية للمثال:</p>
+                    <p class="font-mono text-emerald-400 text-sm font-bold text-xl text-center" dir="ltr">cout &lt;&lt; 3;</p>
+                </div>
+            `
+        };
+
+        window.showFlowExp = function(nodeId) {
+            const expDiv = document.getElementById('flow-explanation');
+            if(flowExplanations[nodeId]) {
+                expDiv.style.opacity = 0;
+                setTimeout(() => {
+                    expDiv.innerHTML = flowExplanations[nodeId];
+                    expDiv.style.opacity = 1;
+                }, 200);
+            }
+        };
+
+
+        // --- Dynamic Random Interactive Stepper Logic (Using BigInt for Precision) ---
+        let currentA = "3";
+        let currentB = "5";
+        let currentM = "10";
+        let stepsData = [];
+        let currentStepIndex = -1;
+
+        // توليد مسألة عشوائية
+        function initDynamicScenario() {
+            currentA = (Math.floor(Math.random() * 9) + 2).toString();
+            currentB = (Math.floor(Math.random() * 100) + 15).toString();
+            currentM = (Math.floor(Math.random() * 16) + 5).toString();
+
+            document.getElementById('input-a').value = currentA;
+            document.getElementById('input-b').value = currentB;
+            document.getElementById('input-m').value = currentM;
+
+            startCustomScenario();
+        }
+
+        // قراءة المدخلات وبدء المحاكاة
+        function startCustomScenario() {
+            // Read inputs and strip non-numeric characters to avoid crashes
+            let valA = document.getElementById('input-a').value.replace(/[^0-9]/g, '');
+            let valB = document.getElementById('input-b').value.replace(/[^0-9]/g, '');
+            let valM = document.getElementById('input-m').value.replace(/[^0-9]/g, '');
+
+            // Fallbacks for empty inputs
+            if(!valA) valA = "0";
+            if(!valB) valB = "0";
+            if(!valM || valM === "0") valM = "1"; // M cannot be 0 to avoid Division by Zero
+
+            // Write back safe values
+            document.getElementById('input-a').value = valA;
+            document.getElementById('input-b').value = valB;
+            document.getElementById('input-m').value = valM;
+
+            currentA = valA;
+            currentB = valB;
+            currentM = valM;
+
+            buildStepsData();
+            
+            currentStepIndex = -1;
+            document.getElementById('var-exp').innerText = "-";
+            document.getElementById('var-base').innerText = "-";
+            document.getElementById('var-res').innerText = "-";
+            document.getElementById('step-explanation').innerHTML = `<p class="font-bold mb-2">تم ضبط المعادلة: <span dir="ltr" class="math-eq bg-slate-200 border border-slate-300">(${currentA} ^ ${currentB}) % ${currentM}</span>.</p> اضغط على زر 'الخطوة التالية' لبدء التتبع.`;
+            
+            // Clear tracking table
+            updateTrackingTable(-1);
+            document.getElementById('table-empty-state').style.display = 'block';
+
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+        }
+
+        // بناء خطوات المحاكاة رياضياً مع השرح المختصر للجدول
+        function buildStepsData() {
+            stepsData = [];
+            
+            let A_bn = BigInt(currentA);
+            let B_bn = BigInt(currentB);
+            let M_bn = BigInt(currentM);
+
+            let r = 1n;
+            let b = A_bn % M_bn;
+            let e = B_bn;
+
+            stepsData.push({
+                lines: [8,9,10], res: r.toString(), base: b.toString(), exp: e.toString(), out: "-",
+                desc: `<ul class="list-disc list-inside space-y-2">
+                         <li>تهيئة متغير النتيجة (<span dir="ltr" class="math-eq">res = 1</span>) لأنه المحايد الضربي.</li>
+                         <li>أخذ باقي قسمة الأساس: <span dir="ltr" class="math-eq bg-white border border-slate-200">${A_bn} % ${M_bn} = ${b}</span>.</li>
+                         <li><strong class="text-red-700">السبب (ارتباط بالقيود):</strong> لأن الأساس <span dir="ltr" class="math-eq">A</span> قد يصل لـ <span dir="ltr" class="math-eq">10^6</span>، لو ربعناه لاحقاً ستنفجر الذاكرة. تصغيره مبكراً يضمن أنه لن يتجاوز <span dir="ltr" class="math-eq">M</span>.</li>
+                       </ul>`,
+                shortDesc: `<span class="text-blue-600 font-bold">البداية:</span> <code>res=1</code>، <code>base = A % M</code>، <code>exp = B</code>.`
+            });
+
+            while(e > 0n) {
+                stepsData.push({
+                    lines: [12], res: r.toString(), base: b.toString(), exp: e.toString(), out: "-",
+                    desc: `<ul class="list-disc list-inside space-y-2">
+                             <li>فحص الشرط: هل الأس (<span dir="ltr" class="math-eq">${e}</span>) أكبر من الصفر؟ (نعم).</li>
+                             <li>ندخل الحلقة لتنفيذ عمليات الرفع السريع.</li>
+                           </ul>`,
+                    shortDesc: `<span class="text-slate-600">فحص شرط الحلقة:</span> <code>exp > 0</code>. الدورة مستمرة.`
+                });
+
+                if (e % 2n === 1n) {
+                    let old_r = r;
+                    r = (r * b) % M_bn;
+                    stepsData.push({
+                        lines: [13, 14], res: r.toString(), base: b.toString(), exp: e.toString(), out: "-",
+                        desc: `<ul class="list-disc list-inside space-y-2">
+                                 <li>الأس (<span dir="ltr" class="math-eq">${e}</span>) <strong>عدد فردي</strong>!</li>
+                                 <li>نسحب نسخة من الأساس ونضربها في النتيجة التراكمية: <span dir="ltr" class="math-eq bg-white border border-slate-200">(${old_r} * ${b}) % ${M_bn} = ${r}</span>.</li>
+                                 <li><strong class="text-red-700">السبب (ارتباط بالقيود):</strong> نطبق <span dir="ltr" class="math-eq">% M</span> فوراً لتجنب تجاوز سعة <span dir="ltr" class="math-eq">long long</span>، لأن ترك الأرقام تتراكم سيسبب انهيار البرنامج.</li>
+                               </ul>`,
+                        shortDesc: `<span class="text-emerald-600 font-bold">بما أن الأس فردي &larr;</span> <code>res = (res * base) % M</code>.`
+                    });
+                } else {
+                    stepsData.push({
+                        lines: [13], res: r.toString(), base: b.toString(), exp: e.toString(), out: "-",
+                        desc: `<ul class="list-disc list-inside space-y-2">
+                                 <li>الأس (<span dir="ltr" class="math-eq">${e}</span>) <strong>عدد زوجي</strong>.</li>
+                                 <li>لا نحتاج لضرب النتيجة الآن، نتخطى التعديل على <code>res</code> ونتجه لتربيع الأساس.</li>
+                               </ul>`,
+                        shortDesc: `<span class="text-amber-600 font-bold">الأس زوجي &larr;</span> نتخطى التعديل على النتيجة.`
+                    });
+                }
+
+                let old_b = b;
+                b = (b * b) % M_bn;
+                stepsData.push({
+                    lines: [16], res: r.toString(), base: b.toString(), exp: e.toString(), out: "-",
+                    desc: `<ul class="list-disc list-inside space-y-2">
+                             <li>نُربّع الأساس للمرحلة القادمة: <span dir="ltr" class="math-eq bg-white border border-slate-200">(${old_b} * ${old_b}) % ${M_bn} = ${b}</span>.</li>
+                             <li>بهذه الخطوة نحن نضاعف القوة (قفزات أسية بدلاً من المرور العادي).</li>
+                             <li><strong class="text-red-700">السبب (ارتباط بالقيود):</strong> أيضاً تطبيق <span dir="ltr" class="math-eq">% M</span> هنا بعد التربيع هو الجدار الواقي من الـ Overflow.</li>
+                           </ul>`,
+                    shortDesc: `<span class="text-purple-600 font-bold">نربع الأساس &larr;</span> <code>base = (base * base) % M</code>.`
+                });
+
+                let old_e = e;
+                e = e / 2n; // BigInt division automatically floors
+                stepsData.push({
+                    lines: [17], res: r.toString(), base: b.toString(), exp: e.toString(), out: "-",
+                    desc: `<ul class="list-disc list-inside space-y-2">
+                             <li>نقوم بتنصيف الأس: <span dir="ltr" class="math-eq bg-white border border-slate-200">${old_e} / 2 = ${e}</span> (القسمة الصحيحة تحذف الكسر).</li>
+                             <li><strong class="text-red-700">سر قيد الزمن (Time Limit):</strong> تنصيف الأس يقلل عدد العمليات من <span dir="ltr" class="math-eq">O(B)</span> إلى <span dir="ltr" class="math-eq">O(\\log B)</span>.</li>
+                           </ul>`,
+                    shortDesc: `<span class="text-rose-600 font-bold">ننصف الأس &larr;</span> <code>exp = exp / 2</code>.`
+                });
+            }
+
+            stepsData.push({
+                lines: [12, 20], res: r.toString(), base: b.toString(), exp: e.toString(), out: r.toString(),
+                desc: `<ul class="list-disc list-inside space-y-2">
+                         <li>الأس أصبح صفراً، مما يعني أننا انتهينا من تفكيكه وانتهت الحلقة.</li>
+                         <li>الآن نطبع النتيجة النهائية للمستخدم على الشاشة وهي <strong>(${r})</strong>.</li>
+                       </ul>`,
+                shortDesc: `<span class="text-slate-800 font-black">النهاية:</span> الأس = 0. تنتهي الحلقة ونطبع النتيجة النهائية.`
+            });
+        }
+
+        // تحديث جدول التتبع الذهني
+        function updateTrackingTable(currentIndex) {
+            const tbody = document.getElementById('tracking-table-body');
+            const emptyState = document.getElementById('table-empty-state');
+            
+            if (currentIndex < 0) {
+                tbody.innerHTML = '';
+                return;
+            }
+            
+            emptyState.style.display = 'none';
+            let html = '';
+            
+            for (let i = 0; i <= currentIndex; i++) {
+                let s = stepsData[i];
+                let isLast = (i === currentIndex);
+                // Make the last row highly visible
+                let rowClass = isLast ? 'bg-blue-50 font-bold text-blue-900 border-r-4 border-blue-600 shadow-sm' : 'border-b border-slate-100 hover:bg-slate-50';
+                
+                // Add specific styling for the output
+                let outDisplay = s.out === "-" ? `<span class="text-slate-300">-</span>` : `<span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded border border-rose-200">${s.out}</span>`;
+
+                html += `
+                    <tr class="${rowClass} transition-colors duration-300">
+                        <td class="p-3 text-center align-middle">${i + 1}</td>
+                        <td class="p-3 text-center font-mono align-middle" dir="ltr">${s.exp}</td>
+                        <td class="p-3 text-center font-mono align-middle" dir="ltr">${s.base}</td>
+                        <td class="p-3 text-center font-mono text-emerald-600 font-bold align-middle" dir="ltr">${s.res}</td>
+                        <td class="p-3 text-center font-mono align-middle" dir="ltr">${outDisplay}</td>
+                        <td class="p-3 text-right font-sans text-xs md:text-sm whitespace-normal break-words leading-relaxed align-middle">${s.shortDesc}</td>
+                    </tr>
+                `;
+            }
+            
+            tbody.innerHTML = html;
+            
+            // Auto scroll to bottom
+            const container = document.getElementById('tracking-table-container');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // تحديث الواجهة العامة
+        function updateUI(step, index) {
+            document.getElementById('step-explanation').innerHTML = step.desc;
+            
+            const updateVar = (id, newVal) => {
+                const el = document.getElementById(id);
+                if (el.innerText !== newVal) {
+                    el.innerText = newVal;
+                    el.classList.add('var-updated');
+                    setTimeout(() => el.classList.remove('var-updated'), 300);
+                }
+            };
+
+            updateVar('var-exp', step.exp);
+            updateVar('var-base', step.base);
+            updateVar('var-res', step.res);
+
+            document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active-line'));
+            step.lines.forEach(lineNum => {
+                const lineEl = document.getElementById(`code-line-${lineNum}`);
+                if (lineEl) lineEl.classList.add('active-line');
+            });
+
+            // Update the mental tracking table
+            updateTrackingTable(index);
+        }
+
+        function nextStep() {
+            if (currentStepIndex < stepsData.length - 1) {
+                currentStepIndex++;
+                updateUI(stepsData[currentStepIndex], currentStepIndex);
+            } else {
+                document.getElementById('step-explanation').innerHTML = "<span class='text-accent font-bold'>تم حساب الأس بنجاح قياسي! جرب إدخال أرقامك الخاصة واضغط 'بدء المحاكاة' لسيناريو جديد.</span>";
+            }
+        }
+
+        function resetStepper() {
+            startCustomScenario();
+        }
+
+        // تهيئة النظام عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            updateButtons();
+            // Start with initial values
+            startCustomScenario();
+        });
+    </script>
+</body>
+</html>
